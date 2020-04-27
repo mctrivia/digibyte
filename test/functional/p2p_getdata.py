@@ -22,7 +22,6 @@ class P2PStoreBlock(P2PInterface):
         message.block.calc_sha256()
         self.blocks[message.block.sha256] += 1
 
-
 class GetdataTest(BitcoinTestFramework):
     def set_test_params(self):
         self.num_nodes = 1
