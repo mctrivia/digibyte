@@ -336,6 +336,14 @@ Signing is only possible with addresses of the type 'legacy'.</source>
         <translation>Направи нови ночаник</translation>
     </message>
     <message>
+        <source>Create Wallet...</source>
+        <translation>Направи Новчаник...</translation>
+    </message>
+    <message>
+        <source>Create a new wallet</source>
+        <translation>Направи нови ночаник</translation>
+    </message>
+    <message>
         <source>Wallet:</source>
         <translation>Новчаник:</translation>
     </message>
@@ -522,6 +530,42 @@ Signing is only possible with addresses of the type 'legacy'.</source>
     <message>
         <source>Close all wallets</source>
         <translation>Затвори све новчанике</translation>
+    </message>
+    <message>
+        <source>Node window</source>
+        <translation>Ноде прозор</translation>
+    </message>
+    <message>
+        <source>Open node debugging and diagnostic console</source>
+        <translation>Отвори конзолу за ноде дебуг и дијагностику</translation>
+    </message>
+    <message>
+        <source>&amp;Sending addresses</source>
+        <translation>&amp;Адресе за слање</translation>
+    </message>
+    <message>
+        <source>&amp;Receiving addresses</source>
+        <translation>&amp;Адресе за примање</translation>
+    </message>
+    <message>
+        <source>Open a bitcoin: URI</source>
+        <translation>Отвори биткоин: URI</translation>
+    </message>
+    <message>
+        <source>Open Wallet</source>
+        <translation>Отвори новчаник</translation>
+    </message>
+    <message>
+        <source>Open a wallet</source>
+        <translation>Отвори новчаник</translation>
+    </message>
+    <message>
+        <source>Close Wallet...</source>
+        <translation>Затвори новчаник...</translation>
+    </message>
+    <message>
+        <source>Close wallet</source>
+        <translation>Затвори новчаник</translation>
     </message>
     <message>
         <source>Show the %1 help message to get a list with possible Bitcoin command-line options</source>
@@ -779,6 +823,10 @@ Signing is only possible with addresses of the type 'legacy'.</source>
         <translation>Измени од %1 (%2)</translation>
     </message>
     <message>
+        <source>change from %1 (%2)</source>
+        <translation>Измени од %1 (%2)</translation>
+    </message>
+    <message>
         <source>(change)</source>
         <translation>(промени)</translation>
     </message>
@@ -953,6 +1001,10 @@ Signing is only possible with addresses of the type 'legacy'.</source>
         <translation>Враћање ове опције захтева поновно преузимање целокупног блокчејна - ланца блокова. Брже је преузети цели ланац и касније га скратити. Онемогућава неке напредне опције.</translation>
     </message>
     <message>
+        <source>Reverting this setting requires re-downloading the entire blockchain. It is faster to download the full chain first and prune it later. Disables some advanced features.</source>
+        <translation>Враћање ове опције захтева поновно преузимање целокупног блокчејна. Брже је преузети цели ланац и касније га скратити. Онемогућава неке напредне опције.</translation>
+    </message>
+    <message>
         <source>This initial synchronisation is very demanding, and may expose hardware problems with your computer that had previously gone unnoticed. Each time you run %1, it will continue downloading where it left off.</source>
         <translation>Првобитна синхронизација веома је захтевна и може изложити ваш рачунар хардверским проблемима који раније нису били примећени. Сваки пут када покренете %1, преузимање ће се наставити тамо где је било прекинуто.</translation>
     </message>
@@ -1050,6 +1102,10 @@ Signing is only possible with addresses of the type 'legacy'.</source>
     <message>
         <source>calculating...</source>
         <translation>рачунање...</translation>
+    </message>
+    <message>
+        <source>Estimated time left until synced</source>
+        <translation>Оквирно време до краја синхронизације</translation>
     </message>
     <message>
         <source>Estimated time left until synced</source>
@@ -3796,6 +3852,10 @@ Note:  Since the fee is calculated on a per-byte basis, a fee of "100 satoshis p
     <message>
         <source>Loading wallet...</source>
         <translation>Новчаник се учитава...</translation>
+    </message>
+    <message>
+        <source>Cannot downgrade wallet</source>
+        <translation>Новчаник се не може уназадити</translation>
     </message>
     <message>
         <source>Cannot downgrade wallet</source>

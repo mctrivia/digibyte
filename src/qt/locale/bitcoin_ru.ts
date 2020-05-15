@@ -1655,6 +1655,10 @@ Signing is only possible with addresses of the type 'legacy'.</source>
         <translation>Невозможно обработать запрос платежа, потому что BIP70 не поддерживается.</translation>
     </message>
     <message>
+        <source>Cannot process payment request because BIP70 is not supported.</source>
+        <translation>Невозможно обработать запрос платежа потому что BIP70 не поддерживается.</translation>
+    </message>
+    <message>
         <source>Due to widespread security flaws in BIP70 it's strongly recommended that any merchant instructions to switch wallets be ignored.</source>
         <translation>Из-за широко распространенных недостатков безопасности в BIP70 настоятельно рекомендуется игнорировать любые торговые инструкции по переключению кошельков.</translation>
     </message>
@@ -2188,6 +2192,14 @@ Signing is only possible with addresses of the type 'legacy'.</source>
     <message>
         <source>An optional label to associate with the new receiving address (used by you to identify an invoice).  It is also attached to the payment request.</source>
         <translation>Необязательная метка, ассоциированная с новым адресом приёма (используется вами, чтобы идентифицировать выставленный счёт). Также она присоединяется к запросу платежа.</translation>
+    </message>
+    <message>
+        <source>An optional message that is attached to the payment request and may be displayed to the sender.</source>
+        <translation>Необязательное сообщение, которое присоединяется к запросу платежа и может быть показано отправителю.</translation>
+    </message>
+    <message>
+        <source>An optional label to associate with the new receiving address (used by you to identify an invoice).  It is also attached to the payment request.</source>
+        <translation>Необязательная метка, ассоциированная с новым адресом приёма (используется вами, чтобы идентифицировать выставленные счёт). Также она присоединяется к запросу платежа.</translation>
     </message>
     <message>
         <source>An optional message that is attached to the payment request and may be displayed to the sender.</source>

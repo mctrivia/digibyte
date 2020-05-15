@@ -3511,6 +3511,10 @@ Poznámka: Jelikož je poplatek počítaný za bajt, poplatek o hodnotě "100 sa
         <translation>Načítám P2P adresy…</translation>
     </message>
     <message>
+        <source>Error: Disk space is too low!</source>
+        <translation>Chyba: Místo na disku je příliš malé!</translation>
+    </message>
+    <message>
         <source>Loading banlist...</source>
         <translation>Načítám seznam klateb...</translation>
     </message>

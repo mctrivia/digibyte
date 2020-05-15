@@ -1,6 +1,6 @@
 <TS language="ko" version="2.1">
 <context>
-    <name>AddressBookPage</name>
+    <name>AddressBookPage</name>s
     <message>
         <source>Right-click to edit address or label</source>
         <translation>지갑 주소나 라벨을 수정하려면 우클릭을 하십시오.</translation>
@@ -498,6 +498,14 @@ Signing is only possible with addresses of the type 'legacy'.</source>
     <message>
         <source>Load Partially Signed Bitcoin Transaction from clipboard</source>
         <translation>클립보드로부터 부분적으로 서명된 비트코인 트랜잭션 불러오기</translation>
+    </message>
+    <message>
+        <source>Node window</source>
+        <translation>노드 창</translation>
+    </message>
+    <message>
+        <source>Open node debugging and diagnostic console</source>
+        <translation>노드 디버깅 및 진단 콘솔 열기 </translation>
     </message>
     <message>
         <source>Node window</source>

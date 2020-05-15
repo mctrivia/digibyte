@@ -3666,6 +3666,14 @@ Catatan: Karena biaya dihitung berdasarkan per byte, biaya "100 satoshi per kB" 
         <translation>Transaksi harus mempunyai paling tidak satu penerima</translation>
     </message>
     <message>
+        <source>Transaction has too long of a mempool chain</source>
+        <translation>Transaksi mempunyai rantai mempool yang terlalu panjang</translation>
+    </message>
+    <message>
+        <source>Transaction must have at least one recipient</source>
+        <translation>Transaksi harus mempunyai paling tidak satu penerima</translation>
+    </message>
+    <message>
         <source>Unknown network specified in -onlynet: '%s'</source>
         <translation>Jaringan tidak diketahui yang ditentukan dalam -onlynet: '%s'</translation>
     </message>

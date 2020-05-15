@@ -337,6 +337,14 @@ Signing is only possible with addresses of the type 'legacy'.</source>
         <translation>יצירת ארנק חדש</translation>
     </message>
     <message>
+        <source>Create Wallet...</source>
+        <translation>צור ארנק...</translation>
+    </message>
+    <message>
+        <source>Create a new wallet</source>
+        <translation>צור ארנק חדש</translation>
+    </message>
+    <message>
         <source>Wallet:</source>
         <translation>ארנק:</translation>
     </message>

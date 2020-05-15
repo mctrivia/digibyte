@@ -2502,6 +2502,10 @@ Note:  Since the fee is calculated on a per-byte basis, a fee of "100 satoshis p
         <translation>監視限定残高</translation>
     </message>
     <message>
+        <source>Watch-only balance:</source>
+        <translation>監視限定残高</translation>
+    </message>
+    <message>
         <source>The recipient address is not valid. Please recheck.</source>
         <translation>送金先アドレスが不正です。再確認してください。</translation>
     </message>
