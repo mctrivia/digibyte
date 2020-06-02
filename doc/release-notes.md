@@ -1,11 +1,4 @@
 0.21.1 Release Notes
-====================
-
-Bitcoin Core version 0.21.1 is now available from:
-
-  <https://bitcoincore.org/bin/bitcoin-core-0.21.1/>
-
-This minor release includes various bug fixes and performance
 improvements, as well as updated translations.
 
 Please report bugs using the issue tracker at GitHub:
@@ -42,15 +35,6 @@ longer supported. Additionally, Bitcoin Core does not yet change appearance
 when macOS "dark mode" is activated.
 
 Notable changes
-===============
-
-RPC
----
-
-
-0.21.1 change log
-=================
-
 
 Credits
 =======
