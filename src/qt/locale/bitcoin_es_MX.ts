@@ -467,6 +467,10 @@ Solicitar pagos (genera códigos QR y bitcoin: URI)
         <translation>Las transacciones después de esto todavía no serán visibles.</translation>
     </message>
     <message>
+        <source>Indexing blocks on disk...</source>
+        <translation>Indexando bloques en el disco...</translation>
+    </message>
+    <message>
         <source>Error</source>
         <translation>Error</translation>
     </message>

@@ -890,7 +890,27 @@ Signing is only possible with addresses of the type 'legacy'.</source>
         <source>Create</source>
         <translation>יצירה</translation>
     </message>
-    </context>
+    <message>
+        <source>Wallet Name</source>
+        <translation>שם הארנק</translation>
+    </message>
+    <message>
+        <source>Encrypt Wallet</source>
+        <translation>הצפנת ארנק</translation>
+    </message>
+    <message>
+        <source>Disable Private Keys</source>
+        <translation>השבתת מפתחות פרטיים</translation>
+    </message>
+    <message>
+        <source>Make Blank Wallet</source>
+        <translation>צור ארנק ריק</translation>
+    </message>
+    <message>
+        <source>Create</source>
+        <translation>צור</translation>
+    </message>
+</context>
 <context>
     <name>EditAddressDialog</name>
     <message>

@@ -3448,6 +3448,10 @@ Catatan: Karena biaya dihitung berdasarkan per byte, biaya "100 satoshi per kB" 
         <translation>Memuat banlist...</translation>
     </message>
     <message>
+        <source>Loading banlist...</source>
+        <translation>Memuat banlist...</translation>
+    </message>
+    <message>
         <source>Not enough file descriptors available.</source>
         <translation>Deskripsi berkas tidak tersedia dengan cukup.</translation>
     </message>
@@ -3664,6 +3668,26 @@ Catatan: Karena biaya dihitung berdasarkan per byte, biaya "100 satoshi per kB" 
     <message>
         <source>Transaction must have at least one recipient</source>
         <translation>Transaksi harus mempunyai paling tidak satu penerima</translation>
+    </message>
+    <message>
+        <source>%s is set very high!</source>
+        <translation>%s diset sangat tinggi!</translation>
+    </message>
+    <message>
+        <source>The wallet will avoid paying less than the minimum relay fee.</source>
+        <translation>Dompet akan menghindari pembayaran kurang dari biaya minimum ongkos relay.</translation>
+    </message>
+    <message>
+        <source>This is the minimum transaction fee you pay on every transaction.</source>
+        <translation>Ini adalah ongkos transaksi minimum yang anda bayarkan untuk setiap transaksi.</translation>
+    </message>
+    <message>
+        <source>This is the transaction fee you will pay if you send a transaction.</source>
+        <translation>Ini adalah ongkos transaksi yang akan anda bayarkan jika anda mengirim transaksi.</translation>
+    </message>
+    <message>
+        <source>Transaction amounts must not be negative</source>
+        <translation>Jumlah transaksi tidak boleh negatif</translation>
     </message>
     <message>
         <source>Transaction has too long of a mempool chain</source>

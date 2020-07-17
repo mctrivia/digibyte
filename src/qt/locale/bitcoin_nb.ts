@@ -3531,6 +3531,10 @@ Gå til Fil &gt; Åpne lommebok for å laste en lommebok.
         <translation>%s-utviklerne</translation>
     </message>
     <message>
+        <source>Can't generate a change-address key. No keys in the internal keypool and can't generate any keys.</source>
+        <translation>Kan ikke generere en ledelse-nøkkel. Ingen taster i den interne tasten og kan ikke generere noen nøkler.</translation>
+    </message>
+    <message>
         <source>Cannot obtain a lock on data directory %s. %s is probably already running.</source>
         <translation>Kan ikke låse datamappen %s. %s kjører antagelig allerede.</translation>
     </message>
@@ -3689,6 +3693,10 @@ Gå til Fil &gt; Åpne lommebok for å laste en lommebok.
     <message>
         <source>Loading P2P addresses...</source>
         <translation>Laster maskin-til-maskin -adresser…</translation>
+    </message>
+    <message>
+        <source>Error: Disk space is too low!</source>
+        <translation>Feil: For lite diskplass!</translation>
     </message>
     <message>
         <source>Loading banlist...</source>

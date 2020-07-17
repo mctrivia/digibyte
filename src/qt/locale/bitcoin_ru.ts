@@ -2627,6 +2627,10 @@ Note:  Since the fee is calculated on a per-byte basis, a fee of "100 satoshis p
         <translation>Баланс только для просмотра:</translation>
     </message>
     <message>
+        <source>Watch-only balance:</source>
+        <translation>Watch-only balance:</translation>
+    </message>
+    <message>
         <source>The recipient address is not valid. Please recheck.</source>
         <translation>Адрес получателя неверный. Пожалуйста, перепроверьте.</translation>
     </message>

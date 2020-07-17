@@ -528,6 +528,10 @@ Signing is only possible with addresses of the type 'legacy'.</source>
         <translation>bitcoin 열기: URI</translation>
     </message>
     <message>
+        <source>Open a bitcoin: URI</source>
+        <translation>bitcoin: URI 열기</translation>
+    </message>
+    <message>
         <source>Open Wallet</source>
         <translation>지갑 열기</translation>
     </message>
@@ -2201,6 +2205,10 @@ Signing is only possible with addresses of the type 'legacy'.</source>
         <translation>새로운 수신 주소 생성(&amp;C)</translation>
     </message>
     <message>
+        <source>&amp;Create new receiving address</source>
+        <translation>&amp;새 받을 주소 생성하기</translation>
+    </message>
+    <message>
         <source>Clear all fields of the form.</source>
         <translation>양식의 모든 필드를 지웁니다.</translation>
     </message>
@@ -2540,6 +2548,14 @@ Note:  Since the fee is calculated on a per-byte basis, a fee of "100 satoshis p
     <message>
         <source>%1 to '%2'</source>
         <translation>%1을 '%2'로</translation>
+    </message>
+    <message>
+        <source> from wallet '%1'</source>
+        <translation>%1 지갑에서</translation>
+    </message>
+    <message>
+        <source>%1 to '%2'</source>
+        <translation>%1을(를) %2(으)로</translation>
     </message>
     <message>
         <source>%1 to %2</source>
@@ -3466,6 +3482,10 @@ Go to File &gt; Open Wallet to load a wallet.
         <translation>PSBT 복사됨</translation>
     </message>
     <message>
+        <source>PSBT copied</source>
+        <translation>PSBT 복사됨</translation>
+    </message>
+    <message>
         <source>Can't sign transaction.</source>
         <translation>거래에 서명 할 수 없습니다.</translation>
     </message>
@@ -3728,6 +3748,10 @@ Go to File &gt; Open Wallet to load a wallet.
         <translation>잘못된 P2P 권한: '%s'</translation>
     </message>
     <message>
+        <source>Invalid P2P permission: '%s'</source>
+        <translation>잘못된 P2P 권한: '%s'</translation>
+    </message>
+    <message>
         <source>Invalid amount for -%s=&lt;amount&gt;: '%s'</source>
         <translation>유효하지 않은 금액 -%s=&lt;amount&gt;: '%s'</translation>
     </message>
@@ -3774,6 +3798,10 @@ Go to File &gt; Open Wallet to load a wallet.
     <message>
         <source>Loading P2P addresses...</source>
         <translation>P2P 주소 불러오는 중...</translation>
+    </message>
+    <message>
+        <source>Error: Disk space is too low!</source>
+        <translation>오류: 디스크 공간이 부족합니다!</translation>
     </message>
     <message>
         <source>Loading banlist...</source>

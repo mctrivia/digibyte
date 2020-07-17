@@ -2611,6 +2611,10 @@ Nota: Com que la comissió es calcula en funció dels bytes, una comissió de "1
         <translation>Saldo només de vigilància:</translation>
     </message>
     <message>
+        <source>Watch-only balance:</source>
+        <translation>Saldo només de vigilància:</translation>
+    </message>
+    <message>
         <source>The recipient address is not valid. Please recheck.</source>
         <translation>L'adreça del destinatari no és vàlida. Torneu-la a comprovar.</translation>
     </message>
@@ -3561,6 +3565,10 @@ Ves a Arxiu &gt; Obrir Cartera per a carregar cartera.
         <translation>Els desenvolupadors %s</translation>
     </message>
     <message>
+        <source>Can't generate a change-address key. No keys in the internal keypool and can't generate any keys.</source>
+        <translation>No es pot generar una clau d’adreça de canvi. No hi ha claus al keypool intern i no es pot generar cap clau.</translation>
+    </message>
+    <message>
         <source>Cannot obtain a lock on data directory %s. %s is probably already running.</source>
         <translation>No es pot obtenir un bloqueig al directori de dades %s. %s probablement ja s'estigui executant.</translation>
     </message>
@@ -3747,6 +3755,10 @@ Ves a Arxiu &gt; Obrir Cartera per a carregar cartera.
     <message>
         <source>Loading P2P addresses...</source>
         <translation>S'estan carregant les adreces P2P ...</translation>
+    </message>
+    <message>
+        <source>Error: Disk space is too low!</source>
+        <translation>Error: l'espai del disc és insuficient.</translation>
     </message>
     <message>
         <source>Loading banlist...</source>

@@ -1002,7 +1002,7 @@ Signing is only possible with addresses of the type 'legacy'.</source>
     </message>
     <message>
         <source>Reverting this setting requires re-downloading the entire blockchain. It is faster to download the full chain first and prune it later. Disables some advanced features.</source>
-        <translation>Враћање ове опције захтева поновно преузимање целокупног блокчејна. Брже је преузети цели ланац и касније га скратити. Онемогућава неке напредне опције.</translation>
+        <translation>Враћање ове опције захтева поновно преузимање целокупног блокчејна - ланца блокова. Брже је преузети цели ланац и касније га скратити. Онемогућава неке напредне опције.</translation>
     </message>
     <message>
         <source>This initial synchronisation is very demanding, and may expose hardware problems with your computer that had previously gone unnoticed. Each time you run %1, it will continue downloading where it left off.</source>
