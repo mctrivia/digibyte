@@ -83,14 +83,31 @@ ChainstateManager& EnsureChainman(const util::Ref& context)
 
 /* Calculate the difficulty for a given block index.
  */
-double GetDifficulty(const CBlockIndex* blockindex)
+double GetDifficulty(const CChain& chain, const CBlockIndex* blockindex, int algo)
 {
-    CHECK_NONFATAL(blockindex);
-
-    int nShift = (blockindex->nBits >> 24) & 0xff;
+    unsigned int nBits;
+    unsigned int powLimit = InitialDifficulty(Params().GetConsensus(), algo);
+    if (blockindex == nullptr)
+    {
+        if (chain.Tip() == nullptr)
+            nBits = powLimit;
+        else
+        {
+            //blockindex = chainActive.Tip();
+            blockindex = GetLastBlockIndexForAlgo(chain.Tip(), Params().GetConsensus(), algo);
+            if (blockindex == nullptr)
+                nBits = powLimit;
+            else
+                nBits = blockindex->nBits;
+        }  
+    }
+    else
+        nBits = blockindex->nBits;
+ 
+    int nShift = (nBits >> 24) & 0xff;
     double dDiff =
-        (double)0x0000ffff / (double)(blockindex->nBits & 0x00ffffff);
-
+        (double)0x0000ffff / (double)(nBits & 0x00ffffff);
+ 
     while (nShift < 29)
     {
         dDiff *= 256.0;
@@ -101,7 +118,7 @@ double GetDifficulty(const CBlockIndex* blockindex)
         dDiff /= 256.0;
         nShift--;
     }
-
+ 
     return dDiff;
 }
 
@@ -113,6 +130,11 @@ static int ComputeNextBlockAndDepth(const CBlockIndex* tip, const CBlockIndex* b
     }
     next = nullptr;
     return blockindex == tip ? 1 : -1;
+}
+
+double GetDifficulty(const CBlockIndex* blockindex, int algo)
+{
+    return GetDifficulty(::ChainActive(), blockindex, algo);
 }
 
 UniValue blockheaderToJSON(const CBlockIndex* tip, const CBlockIndex* blockindex)
@@ -133,7 +155,7 @@ UniValue blockheaderToJSON(const CBlockIndex* tip, const CBlockIndex* blockindex
     result.pushKV("mediantime", (int64_t)blockindex->GetMedianTimePast());
     result.pushKV("nonce", (uint64_t)blockindex->nNonce);
     result.pushKV("bits", strprintf("%08x", blockindex->nBits));
-    result.pushKV("difficulty", GetDifficulty(blockindex));
+    result.pushKV("difficulty", GetDifficulty(blockindex, miningAlgo));
     result.pushKV("chainwork", blockindex->nChainWork.GetHex());
     result.pushKV("nTx", (uint64_t)blockindex->nTx);
 

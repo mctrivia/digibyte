@@ -15,4 +15,16 @@ const struct VBDeploymentInfo VersionBitsDeploymentInfo[Consensus::MAX_VERSION_B
         /*.name =*/ "taproot",
         /*.gbt_force =*/ true,
     },
+    {
+        /*.name =*/ "nversionbips",
+        /*.gbt_force =*/ true,
+    },
+    {
+        /*.name =*/ "reservealgo",
+        /*.gbt_force =*/ true,
+    },
+    {
+        /*.name =*/ "odo",
+        /*.gbt_force =*/ true,
+    },
 };
