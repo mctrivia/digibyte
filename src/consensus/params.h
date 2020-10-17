@@ -6,14 +6,21 @@
 #ifndef BITCOIN_CONSENSUS_PARAMS_H
 #define BITCOIN_CONSENSUS_PARAMS_H
 
-#include <uint256.h>
 #include <limits>
+#include <map>
+#include <uint256.h>
 
 namespace Consensus {
 
-enum DeploymentPos
-{
+enum DeploymentPos {
     DEPLOYMENT_TESTDUMMY,
+    DEPLOYMENT_CSV, // Deployment of BIP68, BIP112, and BIP113.
+    DEPLOYMENT_SEGWIT, // Deployment of BIP141, BIP143, and BIP147.
+    DEPLOYMENT_NVERSIONBIPS, // Deployment of BIP34, BIP65, and BIP66.
+    DEPLOYMENT_RESERVEALGO, // Reservation of version bits for future algos
+    DEPLOYMENT_ODO, // Odo hard fork
+    //DEPLOYMENT_EQUIHASH, // Equihash algo swap
+    //DEPLOYMENT_ETHASH, // Ethash algo swap
     // NOTE: Also add new deployments to VersionBitsDeploymentInfo in versionbits.cpp
     MAX_VERSION_BITS_DEPLOYMENTS
 };
@@ -73,13 +80,56 @@ struct Params {
     BIP9Deployment vDeployments[MAX_VERSION_BITS_DEPLOYMENTS];
     /** Proof of work parameters */
     uint256 powLimit;
+    std::map<int, uint256> initialTarget;
     bool fPowAllowMinDifficultyBlocks;
     bool fPowNoRetargeting;
+    bool fRbfEnabled;
     int64_t nPowTargetSpacing;
     int64_t nPowTargetTimespan;
     int64_t DifficultyAdjustmentInterval() const { return nPowTargetTimespan / nPowTargetSpacing; }
+
+    int64_t nTargetTimespan;
+    int64_t nTargetSpacing;
+    int64_t nInterval;
+    int64_t nDiffChangeTarget;
+    int64_t nTargetTimespanRe;
+    int64_t nTargetSpacingRe;
+    int64_t nIntervalRe;
+    int64_t patchBlockRewardDuration;
+    int64_t patchBlockRewardDuration2;
+
+    int64_t nAveragingInterval;
+    int64_t multiAlgoTargetSpacing;
+    int64_t multiAlgoTargetSpacingV4;
+    int64_t nAveragingTargetTimespan;
+    int64_t nAveragingTargetTimespanV4;
+
+    int64_t nMaxAdjustDown;
+    int64_t nMaxAdjustUp;
+    int64_t nMaxAdjustDownV3;
+    int64_t nMaxAdjustUpV3;
+    int64_t nMaxAdjustDownV4;
+    int64_t nMaxAdjustUpV4;
+
+    int64_t nMinActualTimespan;
+    int64_t nMaxActualTimespan;
+    int64_t nMinActualTimespanV3;
+    int64_t nMaxActualTimespanV3;
+    int64_t nMinActualTimespanV4;
+    int64_t nMaxActualTimespanV4;
+
+    int64_t nLocalTargetAdjustment;
+    int64_t nLocalDifficultyAdjustment;
+
+    int64_t multiAlgoDiffChangeTarget;
+    int64_t alwaysUpdateDiffChangeTarget;
+    int64_t workComputationChangeTarget;
+    int64_t algoSwapChangeTarget;
+
+    uint32_t nOdoShapechangeInterval;
     uint256 nMinimumChainWork;
     uint256 defaultAssumeValid;
+    bool EnableRBF() const { return fRbfEnabled; }
 };
 } // namespace Consensus
 

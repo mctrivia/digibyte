@@ -393,6 +393,42 @@ crypto_libbitcoin_crypto_base_a_SOURCES = \
   crypto/siphash.cpp \
   crypto/siphash.h
 
+crypto_libbitcoin_crypto_base_a_SOURCES += \
+  crypto/blake.c \
+  crypto/bmw.c \
+  crypto/cubehash.c \
+  crypto/echo.c \
+  crypto/groestl.c \
+  crypto/jh.c \
+  crypto/keccak.c \
+  crypto/luffa.c \
+  crypto/shavite.c \
+  crypto/simd.c \
+  crypto/skein.c \
+  crypto/hashgroestl.h \
+  crypto/hashodo.h \
+  crypto/hashqubit.h \
+  crypto/hashskein.h \
+  crypto/odocrypt.cpp \
+  crypto/odocrypt.h \
+  crypto/scrypt.cpp \
+  crypto/scrypt-sse2.cpp \
+  crypto/sph_blake.h \
+  crypto/sph_bmw.h \
+  crypto/sph_cubehash.h \
+  crypto/sph_echo.h \
+  crypto/sph_groestl.h \
+  crypto/sph_jh.h \
+  crypto/sph_keccak.h \
+  crypto/sph_luffa.h \
+  crypto/sph_shavite.h \
+  crypto/sph_simd.h \
+  crypto/sph_skein.h \
+  crypto/sph_types.h \
+  crypto/scrypt.h \
+  crypto/KeccakP-800-reference.c \
+  crypto/KeccakP-800-SnP.h
+
 if USE_ASM
 crypto_libbitcoin_crypto_base_a_SOURCES += crypto/sha256_sse4.cpp
 endif

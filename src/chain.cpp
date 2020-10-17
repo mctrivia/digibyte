@@ -3,7 +3,10 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+#include <arith_uint256.h>
 #include <chain.h>
+#include <chainparams.h>
+#include <validation.h>
 
 /**
  * CChain implementation
@@ -119,7 +122,29 @@ void CBlockIndex::BuildSkip()
         pskip = pprev->GetAncestor(GetSkipHeight(nHeight));
 }
 
-arith_uint256 GetBlockProof(const CBlockIndex& block)
+int GetAlgoWorkFactor(int nHeight, int algo)
+{
+    if (nHeight < Params().GetConsensus().multiAlgoDiffChangeTarget)
+        return 1;
+
+    switch (algo)
+    {
+        case ALGO_SHA256D:
+            return 1;
+        case ALGO_SCRYPT:
+            return 1024 * 4;
+        case ALGO_GROESTL:
+            return 64 * 8;
+        case ALGO_SKEIN:
+            return 4 * 6;
+        case ALGO_QUBIT:
+            return 128 * 8;
+        default:
+            return 1;
+    }
+}
+
+arith_uint256 GetBlockProofBase(const CBlockIndex& block)
 {
     arith_uint256 bnTarget;
     bool fNegative;
@@ -132,6 +157,49 @@ arith_uint256 GetBlockProof(const CBlockIndex& block)
     // as bnTarget+1, it is equal to ((2**256 - bnTarget - 1) / (bnTarget+1)) + 1,
     // or ~bnTarget / (bnTarget+1) + 1.
     return (~bnTarget / (bnTarget + 1)) + 1;
+}
+
+// DGB 6.14.1 GetBlock Proof
+arith_uint256 GetBlockProof(const CBlockIndex& block)
+{
+    CBlockHeader header = block.GetBlockHeader();
+    int nHeight = block.nHeight;
+    const Consensus::Params& params = Params().GetConsensus();
+
+    if (nHeight < params.workComputationChangeTarget)
+    {
+        arith_uint256 bnBlockWork = GetBlockProofBase(block);
+        uint32_t nAlgoWork = GetAlgoWorkFactor(nHeight, header.GetAlgo());
+        return bnBlockWork * nAlgoWork;
+    }
+    else
+    {
+        // Compute the geometric mean of the block targets for each individual algorithm.
+        arith_uint256 bnAvgTarget(1);
+
+        for (int i = 0; i < NUM_ALGOS_IMPL; i++)
+        {
+            if (!IsAlgoActive(block.pprev, params, i))
+                continue;
+            unsigned int nBits = GetNextWorkRequired(block.pprev, &header, params, i);
+            arith_uint256 bnTarget;
+            bool fNegative;
+            bool fOverflow;
+            bnTarget.SetCompact(nBits, &fNegative, &fOverflow);
+            if (fNegative || fOverflow || bnTarget == 0)
+                return 0;
+            // Instead of multiplying them all together and then taking the
+            // nth root at the end, take the roots individually then multiply so
+            // that all intermediate values fit in 256-bit integers.
+            bnAvgTarget *= bnTarget.ApproxNthRoot(NUM_ALGOS);
+        }
+        // see comment in GetProofBase
+        arith_uint256 bnRes = (~bnAvgTarget / (bnAvgTarget + 1)) + 1;
+        // Scale to roughly match the old work calculation
+        bnRes <<= 7;
+
+        return bnRes;
+    }
 }
 
 int64_t GetBlockProofEquivalentTime(const CBlockIndex& to, const CBlockIndex& from, const CBlockIndex& tip, const Consensus::Params& params)

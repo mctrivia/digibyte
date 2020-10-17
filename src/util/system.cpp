@@ -84,6 +84,9 @@ static std::map<std::string, std::unique_ptr<fsbridge::FileLock>> dir_locks;
 /** Mutex to protect dir_locks. */
 static std::mutex cs_dir_locks;
 
+/* global mining algorithm var */
+int miningAlgo = 0;
+
 bool LockDirectory(const fs::path& directory, const std::string lockfile_name, bool probe_only)
 {
     std::lock_guard<std::mutex> ulock(cs_dir_locks);

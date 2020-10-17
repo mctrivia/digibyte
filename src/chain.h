@@ -10,6 +10,7 @@
 #include <consensus/params.h>
 #include <flatfile.h>
 #include <primitives/block.h>
+#include <pow.h>
 #include <tinyformat.h>
 #include <uint256.h>
 
@@ -233,6 +234,18 @@ public:
     uint256 GetBlockHash() const
     {
         return *phashBlock;
+    }
+
+    uint256 GetBlockPoWHash() const
+    {
+        CBlockHeader block = GetBlockHeader();
+        return GetPoWAlgoHash(block);
+    }
+
+    int GetAlgo() const
+    {
+        CBlockHeader block = GetBlockHeader();
+        return block.GetAlgo();
     }
 
     /**

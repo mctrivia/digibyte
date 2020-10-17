@@ -101,7 +101,7 @@ static UniValue getnetworkhashps(const JSONRPCRequest& request)
     return GetNetworkHashPS(!request.params[0].isNull() ? request.params[0].get_int() : 120, !request.params[1].isNull() ? request.params[1].get_int() : -1);
 }
 
-static UniValue generateBlocks(const CTxMemPool& mempool, const CScript& coinbase_script, int nGenerate, uint64_t nMaxTries)
+static UniValue generateBlocks(const CTxMemPool& mempool, const CScript& coinbase_script, int nGenerate, uint64_t nMaxTries, int algo)
 {
     int nHeightEnd = 0;
     int nHeight = 0;
@@ -115,7 +115,7 @@ static UniValue generateBlocks(const CTxMemPool& mempool, const CScript& coinbas
     UniValue blockHashes(UniValue::VARR);
     while (nHeight < nHeightEnd && !ShutdownRequested())
     {
-        std::unique_ptr<CBlockTemplate> pblocktemplate(BlockAssembler(mempool, Params()).CreateNewBlock(coinbase_script));
+        std::unique_ptr<CBlockTemplate> pblocktemplate(BlockAssembler(mempool, Params()).CreateNewBlock(coinbase_script, algo));
         if (!pblocktemplate.get())
             throw JSONRPCError(RPC_INTERNAL_ERROR, "Couldn't create new block");
         CBlock *pblock = &pblocktemplate->block;
@@ -123,7 +123,7 @@ static UniValue generateBlocks(const CTxMemPool& mempool, const CScript& coinbas
             LOCK(cs_main);
             IncrementExtraNonce(pblock, ::ChainActive().Tip(), nExtraNonce);
         }
-        while (nMaxTries > 0 && pblock->nNonce < std::numeric_limits<uint32_t>::max() && !CheckProofOfWork(pblock->GetHash(), pblock->nBits, Params().GetConsensus()) && !ShutdownRequested()) {
+        while (nMaxTries > 0 && pblock->nNonce < std::numeric_limits<uint32_t>::max() && !CheckProofOfWork(GetPoWAlgoHash(*pblock), pblock->nBits, Params().GetConsensus()) && !ShutdownRequested()) {
             ++pblock->nNonce;
             --nMaxTries;
         }
@@ -151,6 +151,7 @@ static UniValue generatetodescriptor(const JSONRPCRequest& request)
             {"num_blocks", RPCArg::Type::NUM, RPCArg::Optional::NO, "How many blocks are generated immediately."},
             {"descriptor", RPCArg::Type::STR, RPCArg::Optional::NO, "The descriptor to send the newly generated bitcoin to."},
             {"maxtries", RPCArg::Type::NUM, /* default */ "1000000", "How many iterations to try."},
+            {"algo", RPCArg::Type::STR, RPCArg::Optional::NO, "The mining algorithm to use."},
         },
         RPCResult{
             RPCResult::Type::ARR, "", "hashes of blocks generated",
@@ -185,8 +186,11 @@ static UniValue generatetodescriptor(const JSONRPCRequest& request)
     const CTxMemPool& mempool = EnsureMemPool();
 
     CHECK_NONFATAL(coinbase_script.size() == 1);
-
-    return generateBlocks(mempool, coinbase_script.at(0), num_blocks, max_tries);
+    int algo = miningAlgo;
+    if (!request.params[3].isNull()) {
+        algo = GetAlgoByName(request.params[3].get_str(), algo);
+    }
+    return generateBlocks(mempool, coinbase_script.at(0), num_blocks, max_tries, algo);
 }
 
 static UniValue generatetoaddress(const JSONRPCRequest& request)
@@ -197,6 +201,7 @@ static UniValue generatetoaddress(const JSONRPCRequest& request)
                     {"nblocks", RPCArg::Type::NUM, RPCArg::Optional::NO, "How many blocks are generated immediately."},
                     {"address", RPCArg::Type::STR, RPCArg::Optional::NO, "The address to send the newly generated bitcoin to."},
                     {"maxtries", RPCArg::Type::NUM, /* default */ "1000000", "How many iterations to try."},
+                    {"algo", RPCArg::Type::STR, RPCArg::Optional::NO, "The mining algorithm to use."},
                 },
                 RPCResult{
                     RPCResult::Type::ARR, "", "hashes of blocks generated",
@@ -216,6 +221,10 @@ static UniValue generatetoaddress(const JSONRPCRequest& request)
     if (!request.params[2].isNull()) {
         nMaxTries = request.params[2].get_int();
     }
+    int algo = miningAlgo;
+    if (!request.params[3].isNull()) {
+        algo = GetAlgoByName(request.params[3].get_str(), algo);
+    }
 
     CTxDestination destination = DecodeDestination(request.params[1].get_str());
     if (!IsValidDestination(destination)) {
@@ -226,7 +235,7 @@ static UniValue generatetoaddress(const JSONRPCRequest& request)
 
     CScript coinbase_script = GetScriptForDestination(destination);
 
-    return generateBlocks(mempool, coinbase_script, nGenerate, nMaxTries);
+    return generateBlocks(mempool, coinbase_script, nGenerate, nMaxTries, algo);
 }
 
 static UniValue getmininginfo(const JSONRPCRequest& request)
@@ -259,8 +268,18 @@ static UniValue getmininginfo(const JSONRPCRequest& request)
     obj.pushKV("blocks",           (int)::ChainActive().Height());
     if (BlockAssembler::m_last_block_weight) obj.pushKV("currentblockweight", *BlockAssembler::m_last_block_weight);
     if (BlockAssembler::m_last_block_num_txs) obj.pushKV("currentblocktx", *BlockAssembler::m_last_block_num_txs);
-    obj.pushKV("difficulty",       (double)GetDifficulty(::ChainActive().Tip()));
-    obj.pushKV("networkhashps",    getnetworkhashps(request));
+    obj.pushKV("pow_algo_id",        miningAlgo);
+    obj.pushKV("pow_algo",           GetAlgoName(miningAlgo));
+    obj.pushKV("difficulty",         (double)GetDifficulty(NULL, miningAlgo));
+    for (int algo = 0; algo < NUM_ALGOS_IMPL; algo++)
+    {
+        if (IsAlgoActive(::ChainActive().Tip(), Params().GetConsensus(), algo))
+        {
+            std::string key = "difficulty_" + GetAlgoName(algo);
+            obj.pushKV(key, (double)GetDifficulty(NULL, algo));
+        }
+    }
+    // obj.pushKV("networkhashps",    getnetworkhashps(request));
     obj.pushKV("pooledtx",         (uint64_t)mempool.size());
     obj.pushKV("chain",            Params().NetworkIDString());
     obj.pushKV("warnings",         GetWarnings(false));
@@ -482,6 +501,12 @@ static UniValue getblocktemplate(const JSONRPCRequest& request)
         }
     }
 
+    int algo = miningAlgo;
+    if (!request.params[1].isNull()) {
+        std::string strAlgo = request.params[1].get_str();
+        algo = GetAlgoByName(strAlgo, algo);
+    }
+
     if (strMode != "template")
         throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid mode");
 
@@ -553,8 +578,10 @@ static UniValue getblocktemplate(const JSONRPCRequest& request)
     static CBlockIndex* pindexPrev;
     static int64_t nStart;
     static std::unique_ptr<CBlockTemplate> pblocktemplate;
+    static int lastAlgo;
     if (pindexPrev != ::ChainActive().Tip() ||
-        (mempool.GetTransactionsUpdated() != nTransactionsUpdatedLast && GetTime() - nStart > 5))
+        (mempool.GetTransactionsUpdated() != nTransactionsUpdatedLast && GetTime() - nStart > 5) ||
+            algo != lastAlgo)
     {
         // Clear pindexPrev so future calls make a new block, despite any failures from here on
         pindexPrev = nullptr;
@@ -563,10 +590,11 @@ static UniValue getblocktemplate(const JSONRPCRequest& request)
         nTransactionsUpdatedLast = mempool.GetTransactionsUpdated();
         CBlockIndex* pindexPrevNew = ::ChainActive().Tip();
         nStart = GetTime();
+        lastAlgo = algo;
 
         // Create new block
         CScript scriptDummy = CScript() << OP_TRUE;
-        pblocktemplate = BlockAssembler(mempool, Params()).CreateNewBlock(scriptDummy);
+        pblocktemplate = BlockAssembler(mempool, Params()).CreateNewBlock(scriptDummy, algo);
         if (!pblocktemplate)
             throw JSONRPCError(RPC_OUT_OF_MEMORY, "Out of memory");
 
@@ -578,7 +606,7 @@ static UniValue getblocktemplate(const JSONRPCRequest& request)
     const Consensus::Params& consensusParams = Params().GetConsensus();
 
     // Update nTime
-    UpdateTime(pblock, consensusParams, pindexPrev);
+    UpdateTime(pblock, consensusParams, pindexPrev, algo);
     pblock->nNonce = 0;
 
     // NOTE: If at some point we support pre-segwit miners post-segwit-activation, this needs to take segwit support into consideration
@@ -718,6 +746,8 @@ static UniValue getblocktemplate(const JSONRPCRequest& request)
     result.pushKV("curtime", pblock->GetBlockTime());
     result.pushKV("bits", strprintf("%08x", pblock->nBits));
     result.pushKV("height", (int64_t)(pindexPrev->nHeight+1));
+    if (algo == ALGO_ODO)
+        result.pushKV("odokey", (int64_t)OdoKey(consensusParams, pblock->GetBlockTime()));
 
     if (!pblocktemplate->vchCoinbaseCommitment.empty()) {
         result.pushKV("default_witness_commitment", HexStr(pblocktemplate->vchCoinbaseCommitment.begin(), pblocktemplate->vchCoinbaseCommitment.end()));
