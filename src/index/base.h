@@ -13,6 +13,9 @@
 
 class CBlockIndex;
 
+bool isUsingQuickIndex();
+void setQuickIndex(bool useQuickIndex);
+
 /**
  * Base class for indices of blockchain data. This implements
  * CValidationInterface and ensures blocks are indexed sequentially according

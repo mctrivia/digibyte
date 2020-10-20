@@ -109,7 +109,7 @@ static const int64_t BLOCK_DOWNLOAD_TIMEOUT_PER_PEER = 500000;
 static const int64_t DEFAULT_MAX_TIP_AGE = 24 * 60 * 60;
 /** Maximum age of our tip in seconds for us to be considered current for fee estimation */
 static const int64_t MAX_FEE_ESTIMATION_TIP_AGE = 3 * 60 * 60;
-
+static const bool DEFAULT_QUICKINDEX = false;
 static const bool DEFAULT_CHECKPOINTS_ENABLED = true;
 static const bool DEFAULT_TXINDEX = false;
 static const char* const DEFAULT_BLOCKFILTERINDEX = "0";

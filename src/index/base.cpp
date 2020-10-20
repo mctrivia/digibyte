@@ -16,6 +16,11 @@ constexpr char DB_BEST_BLOCK = 'B';
 constexpr int64_t SYNC_LOG_INTERVAL = 30; // seconds
 constexpr int64_t SYNC_LOCATOR_WRITE_INTERVAL = 30; // seconds
 
+//! add an extra field to blockindex to lower cpu usage during runtime
+bool quickIndex{false};
+bool isUsingQuickIndex() { return quickIndex; }
+void setQuickIndex(bool useQuickIndex) { quickIndex = useQuickIndex; }
+
 template<typename... Args>
 static void FatalError(const char* fmt, const Args&... args)
 {
