@@ -63,18 +63,19 @@ CTxMemPool& EnsureMemPool()
 
 /* Calculate the difficulty for a given block index.
  */
-double GetDifficulty(const CChain& chain, const CBlockIndex* blockindex, int algo)
+double GetDifficulty(const CBlockIndex* blockindex, int algo)
 {
     unsigned int nBits;
     unsigned int powLimit = InitialDifficulty(Params().GetConsensus(), algo);
     if (blockindex == nullptr)
     {
-        if (chain.Tip() == nullptr)
+        auto currentChain = ::ChainActive().Tip();
+
+        if (currentChain == nullptr)
             nBits = powLimit;
         else
         {
-            //blockindex = chainActive.Tip();
-            blockindex = GetLastBlockIndexForAlgo(chain.Tip(), Params().GetConsensus(), algo);
+            blockindex = GetLastBlockIndexForAlgo(currentChain, Params().GetConsensus(), algo);
             if (blockindex == nullptr)
                 nBits = powLimit;
             else
@@ -110,11 +111,6 @@ static int ComputeNextBlockAndDepth(const CBlockIndex* tip, const CBlockIndex* b
     }
     next = nullptr;
     return blockindex == tip ? 1 : -1;
-}
-
-double GetDifficulty(const CBlockIndex* blockindex, int algo)
-{
-    return GetDifficulty(::ChainActive(), blockindex, algo);
 }
 
 UniValue blockheaderToJSON(const CBlockIndex* tip, const CBlockIndex* blockindex)
