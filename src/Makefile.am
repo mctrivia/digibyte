@@ -175,7 +175,6 @@ BITCOIN_CORE_H = \
   policy/feerate.h \
   policy/fees.h \
   policy/policy.h \
-  policy/rbf.h \
   policy/settings.h \
   pow.h \
   protocol.h \
@@ -311,7 +310,6 @@ libbitcoin_server_a_SOURCES = \
   node/ui_interface.cpp \
   noui.cpp \
   policy/fees.cpp \
-  policy/rbf.cpp \
   policy/settings.cpp \
   pow.cpp \
   rest.cpp \
@@ -577,7 +575,6 @@ libbitcoin_util_a_SOURCES = \
   util/system.cpp \
   util/message.cpp \
   util/moneystr.cpp \
-  util/rbf.cpp \
   util/settings.cpp \
   util/threadnames.cpp \
   util/spanparsing.cpp \

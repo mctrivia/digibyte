@@ -15,7 +15,6 @@
 #include <streams.h>
 #include <test/fuzz/fuzz.h>
 #include <univalue.h>
-#include <util/rbf.h>
 #include <validation.h>
 #include <version.h>
 
