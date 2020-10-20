@@ -184,6 +184,8 @@ void Shutdown(NodeContext& node)
     /// module was initialized.
     util::ThreadRename("shutoff");
     mempool.AddTransactionsUpdated(1);
+    // Changes to mempool should also be made to Dandelion stempool
+    stempool.AddTransactionsUpdated(1);
 
     StopHTTPRPC();
     StopREST();
@@ -297,6 +299,7 @@ void Shutdown(NodeContext& node)
     globalVerifyHandle.reset();
     ECC_Stop();
     if (node.mempool) node.mempool = nullptr;
+    if (node.stempool) node.stempool = nullptr;
     node.scheduler.reset();
 
     try {
@@ -529,6 +532,7 @@ void SetupServerArgs()
     gArgs.AddArg("-maxsigcachesize=<n>", strprintf("Limit sum of signature cache and script execution cache sizes to <n> MiB (default: %u)", DEFAULT_MAX_SIG_CACHE_SIZE), ArgsManager::ALLOW_ANY | ArgsManager::DEBUG_ONLY, OptionsCategory::DEBUG_TEST);
     gArgs.AddArg("-maxtipage=<n>", strprintf("Maximum tip age in seconds to consider node in initial block download (default: %u)", DEFAULT_MAX_TIP_AGE), ArgsManager::ALLOW_ANY | ArgsManager::DEBUG_ONLY, OptionsCategory::DEBUG_TEST);
     gArgs.AddArg("-quickindex", strprintf("Setup the blockindex for quick client startup and less cpu use during runtime (default: %u)", DEFAULT_QUICKINDEX), ArgsManager::ALLOW_ANY | ArgsManager::DEBUG_ONLY, OptionsCategory::DEBUG_TEST);
+    gArgs.AddArg("-dandelion=<n>", strprintf("Enable dandelion support (anonymized transaction relaying) (default: %u)", DEFAULT_DANDELION_PROTOCOL), ArgsManager::ALLOW_ANY | ArgsManager::DEBUG_ONLY, OptionsCategory::DEBUG_TEST);
     gArgs.AddArg("-printpriority", strprintf("Log transaction fee per kB when mining blocks (default: %u)", DEFAULT_PRINTPRIORITY), ArgsManager::ALLOW_ANY | ArgsManager::DEBUG_ONLY, OptionsCategory::DEBUG_TEST);
     gArgs.AddArg("-printtoconsole", "Send trace/debug info to console (default: 1 when no -daemon. To disable logging to file, set -nodebuglogfile)", ArgsManager::ALLOW_ANY, OptionsCategory::DEBUG_TEST);
     gArgs.AddArg("-shrinkdebugfile", "Shrink debug.log file on client startup (default: 1 when no -debug)", ArgsManager::ALLOW_ANY, OptionsCategory::DEBUG_TEST);
@@ -1044,6 +1048,8 @@ bool AppInitParameterInteraction()
     int ratio = std::min<int>(std::max<int>(gArgs.GetArg("-checkmempool", chainparams.DefaultConsistencyChecks() ? 1 : 0), 0), 1000000);
     if (ratio != 0) {
         mempool.setSanityCheck(1.0 / ratio);
+        // Changes to mempool should also be made to Dandelion stempool
+        stempool.setSanityCheck(1.0 / ratio);
     }
     fCheckBlockIndex = gArgs.GetBoolArg("-checkblockindex", chainparams.DefaultConsistencyChecks());
     fCheckpointsEnabled = gArgs.GetBoolArg("-checkpoints", DEFAULT_CHECKPOINTS_ENABLED);
@@ -1358,6 +1364,8 @@ bool AppInitMain(NodeContext& node)
     // which are all started after this, may use it from the node context.
     assert(!node.mempool);
     node.mempool = &::mempool;
+    assert(!node.stempool);
+    node.stempool = &::stempool;
 
     node.peer_logic.reset(new PeerLogicValidation(node.connman.get(), node.banman.get(), *node.scheduler, *node.mempool));
     RegisterValidationInterface(node.peer_logic.get());

@@ -176,5 +176,6 @@ inline uint256 uint256S(const std::string& str)
 }
 
 uint256& UINT256_ONE();
+uint256& UINT256_MAX();
 
 #endif // BITCOIN_UINT256_H

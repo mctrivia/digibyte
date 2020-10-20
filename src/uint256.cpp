@@ -80,3 +80,8 @@ uint256& UINT256_ONE() {
     static uint256* one = new uint256(uint256S("0000000000000000000000000000000000000000000000000000000000000001"));
     return *one;
 }
+
+uint256& UINT256_MAX() {
+    static uint256* max = new uint256(uint256S("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"));
+    return *max;
+}

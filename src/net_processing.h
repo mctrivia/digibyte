@@ -20,6 +20,8 @@ extern RecursiveMutex g_cs_orphans;
 static const unsigned int DEFAULT_MAX_ORPHAN_TRANSACTIONS = 100;
 /** Default number of orphan+recently-replaced txn to keep around for block reconstruction */
 static const unsigned int DEFAULT_BLOCK_RECONSTRUCTION_EXTRA_TXN = 100;
+/** Probability (percentage) that a Dandelion transaction enters fluff phase */
+static const unsigned int DANDELION_FLUFF = 10;
 static const bool DEFAULT_PEERBLOOMFILTERS = false;
 
 class PeerLogicValidation final : public CValidationInterface, public NetEventsInterface {
@@ -92,6 +94,6 @@ struct CNodeStateStats {
 bool GetNodeStateStats(NodeId nodeid, CNodeStateStats &stats);
 
 /** Relay transaction to every node */
-void RelayTransaction(const uint256&, const CConnman& connman);
+void RelayTransaction(const uint256&, /*const*/ CConnman& connman);
 
 #endif // BITCOIN_NET_PROCESSING_H

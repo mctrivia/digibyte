@@ -127,6 +127,7 @@ CFeeRate minRelayTxFee = CFeeRate(DEFAULT_MIN_RELAY_TX_FEE);
 
 CBlockPolicyEstimator feeEstimator;
 CTxMemPool mempool(&feeEstimator);
+CTxMemPool stempool(&feeEstimator);
 
 // Internal stuff
 namespace {
@@ -348,7 +349,7 @@ static bool IsCurrentForFeeEstimation() EXCLUSIVE_LOCKS_REQUIRED(cs_main)
  * and instead just erase from the mempool as needed.
  */
 
-static void UpdateMempoolForReorg(DisconnectedBlockTransactions& disconnectpool, bool fAddToMempool) EXCLUSIVE_LOCKS_REQUIRED(cs_main, ::mempool.cs)
+static void UpdateMempoolForReorg(DisconnectedBlockTransactions& disconnectpool, bool fAddToMempool) EXCLUSIVE_LOCKS_REQUIRED(cs_main, ::mempool.cs, ::stempool.cs)
 {
     AssertLockHeld(cs_main);
     std::vector<uint256> vHashUpdate;
@@ -361,13 +362,16 @@ static void UpdateMempoolForReorg(DisconnectedBlockTransactions& disconnectpool,
     auto it = disconnectpool.queuedTx.get<insertion_order>().rbegin();
     while (it != disconnectpool.queuedTx.get<insertion_order>().rend()) {
         // ignore validation errors in resurrected transactions
-        TxValidationState stateDummy;
-        if (!fAddToMempool || (*it)->IsCoinBase() ||
-            !AcceptToMemoryPool(mempool, stateDummy, *it,
-                                nullptr /* plTxnReplaced */, true /* bypass_limits */, 0 /* nAbsurdFee */)) {
+        TxValidationState stateDummy, dandelionStateDummy;
+        bool ret = !AcceptToMemoryPool(mempool, stateDummy, *it, nullptr, true, 0);
+        // Changes to mempool should also be made to Dandelion stempool
+        AcceptToMemoryPool(stempool, dandelionStateDummy, *it, nullptr, true, 0);
+        if (!fAddToMempool || (*it)->IsCoinBase() || ret) {
             // If the transaction doesn't make it in to the mempool, remove any
             // transactions that depend on it (which would now be orphans).
             mempool.removeRecursive(**it, MemPoolRemovalReason::REORG);
+            // Changes to mempool should also be made to Dandelion stempool
+            stempool.removeRecursive(**it, MemPoolRemovalReason::REORG);
         } else if (mempool.exists((*it)->GetHash())) {
             vHashUpdate.push_back((*it)->GetHash());
         }
@@ -380,11 +384,18 @@ static void UpdateMempoolForReorg(DisconnectedBlockTransactions& disconnectpool,
     // UpdateTransactionsFromBlock finds descendants of any transactions in
     // the disconnectpool that were added back and cleans up the mempool state.
     mempool.UpdateTransactionsFromBlock(vHashUpdate);
+    // Changes to mempool should also be made to Dandelion stempool
+    stempool.UpdateTransactionsFromBlock(vHashUpdate);
 
     // We also need to remove any now-immature transactions
     mempool.removeForReorg(&::ChainstateActive().CoinsTip(), ::ChainActive().Tip()->nHeight + 1, STANDARD_LOCKTIME_VERIFY_FLAGS);
+    // Changes to mempool should also be made to Dandelion stempool
+    stempool.removeForReorg(&::ChainstateActive().CoinsTip(), ::ChainActive().Tip()->nHeight + 1, STANDARD_LOCKTIME_VERIFY_FLAGS);
+
     // Re-limit mempool size, in case we added any transactions
     LimitMempoolSize(mempool, gArgs.GetArg("-maxmempool", DEFAULT_MAX_MEMPOOL_SIZE) * 1000000, std::chrono::hours{gArgs.GetArg("-mempoolexpiry", DEFAULT_MEMPOOL_EXPIRY)});
+    // Changes to mempool should also be made to Dandelion stempool
+    LimitMempoolSize(stempool, gArgs.GetArg("-maxmempool", DEFAULT_MAX_MEMPOOL_SIZE) * 1000000, std::chrono::hours{gArgs.GetArg("-mempoolexpiry", DEFAULT_MEMPOOL_EXPIRY)});
 }
 
 // Used to avoid mempool polluting consensus critical paths if CCoinsViewMempool
@@ -429,7 +440,7 @@ namespace {
 class MemPoolAccept
 {
 public:
-    MemPoolAccept(CTxMemPool& mempool) : m_pool(mempool), m_view(&m_dummy), m_viewmempool(&::ChainstateActive().CoinsTip(), m_pool),
+    MemPoolAccept(CTxMemPool& mempool) : m_pool(mempool), s_pool(stempool), m_view(&m_dummy), m_viewmempool(&::ChainstateActive().CoinsTip(), m_pool),
         m_limit_ancestors(gArgs.GetArg("-limitancestorcount", DEFAULT_ANCESTOR_LIMIT)),
         m_limit_ancestor_size(gArgs.GetArg("-limitancestorsize", DEFAULT_ANCESTOR_SIZE_LIMIT)*1000),
         m_limit_descendants(gArgs.GetArg("-limitdescendantcount", DEFAULT_DESCENDANT_LIMIT)),
@@ -481,7 +492,7 @@ private:
     // Looks up inputs, calculates feerate, considers replacement, evaluates
     // package limits, etc. As this function can be invoked for "free" by a peer,
     // only tests that are fast should be done here (to avoid CPU DoS).
-    bool PreChecks(ATMPArgs& args, Workspace& ws) EXCLUSIVE_LOCKS_REQUIRED(cs_main, m_pool.cs);
+    bool PreChecks(ATMPArgs& args, Workspace& ws) EXCLUSIVE_LOCKS_REQUIRED(cs_main, m_pool.cs, s_pool.cs);
 
     // Run the script checks using our policy flags. As this can be slow, we should
     // only invoke this on transactions that have otherwise passed policy checks.
@@ -496,7 +507,7 @@ private:
     // Try to add the transaction to the mempool, removing any conflicts first.
     // Returns true if the transaction is in the mempool after any size
     // limiting is performed, false otherwise.
-    bool Finalize(ATMPArgs& args, Workspace& ws) EXCLUSIVE_LOCKS_REQUIRED(cs_main, m_pool.cs);
+    bool Finalize(ATMPArgs& args, Workspace& ws) EXCLUSIVE_LOCKS_REQUIRED(cs_main, m_pool.cs, s_pool.cs);
 
     // Compare a package's feerate against minimum allowed.
     bool CheckFeeRate(size_t package_size, CAmount package_fee, TxValidationState& state)
@@ -514,6 +525,7 @@ private:
 
 private:
     CTxMemPool& m_pool;
+    CTxMemPool& s_pool;
     CCoinsViewCache m_view;
     CCoinsViewMemPool m_viewmempool;
     CCoinsView m_dummy;
@@ -2457,6 +2469,8 @@ void static UpdateTip(const CBlockIndex* pindexNew, const CChainParams& chainPar
 {
     // New best block
     mempool.AddTransactionsUpdated(1);
+    // Changes to mempool should also be made to Dandelion stempool
+    stempool.AddTransactionsUpdated(1);
 
     {
         LOCK(g_best_block_mutex);
@@ -2554,6 +2568,8 @@ bool CChainState::DisconnectTip(BlockValidationState& state, const CChainParams&
             // Drop the earliest entry, and remove its children from the mempool.
             auto it = disconnectpool->queuedTx.get<insertion_order>().begin();
             mempool.removeRecursive(**it, MemPoolRemovalReason::REORG);
+            // Changes to mempool should also be made to Dandelion stempool
+            stempool.removeRecursive(**it, MemPoolRemovalReason::REORG);
             disconnectpool->removeEntry(it);
         }
     }
@@ -2660,8 +2676,10 @@ bool CChainState::ConnectTip(BlockValidationState& state, const CChainParams& ch
         return false;
     int64_t nTime5 = GetTimeMicros(); nTimeChainState += nTime5 - nTime4;
     LogPrint(BCLog::BENCH, "  - Writing chainstate: %.2fms [%.2fs (%.2fms/blk)]\n", (nTime5 - nTime4) * MILLI, nTimeChainState * MICRO, nTimeChainState * MILLI / nBlocksTotal);
-    // Remove conflicting transactions from the mempool.;
+    // Remove conflicting transactions from the mempool
     mempool.removeForBlock(blockConnecting.vtx, pindexNew->nHeight);
+    // Changes to mempool should also be made to Dandelion stempool
+    stempool.removeForBlock(blockConnecting.vtx, pindexNew->nHeight);
     disconnectpool.removeForBlock(blockConnecting.vtx);
     // Update m_chain & related variables.
     m_chain.SetTip(pindexNew);
@@ -2830,6 +2848,8 @@ bool CChainState::ActivateBestChainStep(BlockValidationState& state, const CChai
         UpdateMempoolForReorg(disconnectpool, true);
     }
     mempool.check(&CoinsTip());
+    // Changes to mempool should also be made to Dandelion stempool
+    stempool.check(&CoinsTip());
 
     // Callbacks/notifications for a new best chain.
     if (fInvalidFound)
@@ -2898,7 +2918,7 @@ bool CChainState::ActivateBestChain(BlockValidationState &state, const CChainPar
         LimitValidationInterfaceQueue();
 
         {
-            LOCK2(cs_main, ::mempool.cs); // Lock transaction pool for at least as long as it takes for connectTrace to be consumed
+            LOCK3(cs_main, ::mempool.cs, ::stempool.cs); // Lock transaction pool for at least as long as it takes for connectTrace to be consumed
             CBlockIndex* starting_tip = m_chain.Tip();
             bool blocks_connected = false;
             do {
@@ -3052,7 +3072,7 @@ bool CChainState::InvalidateBlock(BlockValidationState& state, const CChainParam
         LimitValidationInterfaceQueue();
 
         LOCK(cs_main);
-        LOCK(::mempool.cs); // Lock for as long as disconnectpool is in scope to make sure UpdateMempoolForReorg is called after DisconnectTip without unlocking in between
+        LOCK2(::mempool.cs, ::stempool.cs); // Lock for as long as disconnectpool is in scope to make sure UpdateMempoolForReorg is called after DisconnectTip without unlocking in between
         if (!m_chain.Contains(pindex)) break;
         pindex_was_in_chain = true;
         CBlockIndex *invalid_walk_tip = m_chain.Tip();
@@ -4540,7 +4560,7 @@ bool CChainState::RewindBlockIndex(const CChainParams& params)
     // Loop until the tip is below nHeight, or we reach a pruned block.
     while (!ShutdownRequested()) {
         {
-            LOCK2(cs_main, ::mempool.cs);
+            LOCK3(cs_main, ::mempool.cs, ::stempool.cs);
             // Make sure nothing changed from under us (this won't happen because RewindBlockIndex runs before importing/network are active)
             assert(tip == m_chain.Tip());
             if (tip == nullptr || tip->nHeight < nHeight) break;
@@ -4630,6 +4650,7 @@ void UnloadBlockIndex()
     pindexBestInvalid = nullptr;
     pindexBestHeader = nullptr;
     mempool.clear();
+    stempool.clear();
     vinfoBlockFile.clear();
     nLastBlockFile = 0;
     setDirtyBlockIndex.clear();
@@ -5069,11 +5090,19 @@ bool LoadMempool(CTxMemPool& pool)
             CAmount amountdelta = nFeeDelta;
             if (amountdelta) {
                 pool.PrioritiseTransaction(tx->GetHash(), amountdelta);
+                // Changes to mempool should also be made to Dandelion stempool
+                stempool.PrioritiseTransaction(tx->GetHash(), amountdelta);
             }
             TxValidationState state;
             if (nTime + nExpiryTimeout > nNow) {
                 LOCK(cs_main);
+                int64_t nTimeCopy = nTime; // time isn't const, need copy for Dandelion
                 AcceptToMemoryPoolWithTime(chainparams, pool, state, tx, nTime,
+                                           nullptr /* plTxnReplaced */, false /* bypass_limits */, 0 /* nAbsurdFee */,
+                                           false /* test_accept */);
+                // Changes to mempool should also be made to Dandelion stempool
+                TxValidationState dummystate;
+                AcceptToMemoryPoolWithTime(chainparams, stempool, dummystate, tx, nTimeCopy,
                                            nullptr /* plTxnReplaced */, false /* bypass_limits */, 0 /* nAbsurdFee */,
                                            false /* test_accept */);
                 if (state.IsValid()) {
@@ -5100,6 +5129,8 @@ bool LoadMempool(CTxMemPool& pool)
 
         for (const auto& i : mapDeltas) {
             pool.PrioritiseTransaction(i.first, i.second);
+            // Changes to mempool should also be made to Dandelion stempool
+            stempool.PrioritiseTransaction(i.first, i.second);
         }
     } catch (const std::exception& e) {
         LogPrintf("Failed to deserialize mempool data on disk: %s. Continuing anyway.\n", e.what());

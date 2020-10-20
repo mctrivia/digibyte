@@ -31,6 +31,11 @@ LOCK2(mutex1, mutex2);
     std::unique_lock<std::recursive_mutex> criticalblock1(mutex1);
     std::unique_lock<std::recursive_mutex> criticalblock2(mutex2);
 
+LOCK3(mutex1, mutex2, mutex3);
+    std::unique_lock<std::recursive_mutex> criticalblock1(mutex1);
+    std::unique_lock<std::recursive_mutex> criticalblock2(mutex2);
+    std::unique_lock<std::recursive_mutex> criticalblock3(mutex3);
+
 TRY_LOCK(mutex, name);
     std::unique_lock<std::recursive_mutex> name(mutex, std::try_to_lock_t);
 
@@ -219,6 +224,11 @@ using DebugLock = UniqueLock<typename std::remove_reference<typename std::remove
 #define LOCK2(cs1, cs2)                                               \
     DebugLock<decltype(cs1)> criticalblock1(cs1, #cs1, __FILE__, __LINE__); \
     DebugLock<decltype(cs2)> criticalblock2(cs2, #cs2, __FILE__, __LINE__);
+#define LOCK3(cs1, cs2, cs3)                                          \
+    DebugLock<decltype(cs1)> criticalblock1(cs1, #cs1, __FILE__, __LINE__); \
+    DebugLock<decltype(cs2)> criticalblock2(cs2, #cs2, __FILE__, __LINE__); \
+    DebugLock<decltype(cs3)> criticalblock3(cs3, #cs3, __FILE__, __LINE__);
+
 #define TRY_LOCK(cs, name) DebugLock<decltype(cs)> name(cs, #cs, __FILE__, __LINE__, true)
 #define WAIT_LOCK(cs, name) DebugLock<decltype(cs)> name(cs, #cs, __FILE__, __LINE__)
 
