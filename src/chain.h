@@ -7,6 +7,7 @@
 #define BITCOIN_CHAIN_H
 
 #include <arith_uint256.h>
+#include <index/base.h>
 #include <consensus/params.h>
 #include <flatfile.h>
 #include <primitives/block.h>
@@ -333,13 +334,16 @@ const CBlockIndex* LastCommonAncestor(const CBlockIndex* pa, const CBlockIndex* 
 class CDiskBlockIndex : public CBlockIndex
 {
 public:
+    uint256 hash;
     uint256 hashPrev;
 
     CDiskBlockIndex() {
+        hash = uint256();
         hashPrev = uint256();
     }
 
     explicit CDiskBlockIndex(const CBlockIndex* pindex) : CBlockIndex(*pindex) {
+        hash = (hash == uint256() ? pindex->GetBlockHash() : hash);
         hashPrev = (pprev ? pprev->GetBlockHash() : uint256());
     }
 
@@ -355,6 +359,10 @@ public:
         if (obj.nStatus & BLOCK_HAVE_DATA) READWRITE(VARINT(obj.nDataPos));
         if (obj.nStatus & BLOCK_HAVE_UNDO) READWRITE(VARINT(obj.nUndoPos));
 
+        // store the pow hash for less cpu usage
+        if(isUsingQuickIndex())
+           READWRITE(obj.hash);
+
         // block header
         READWRITE(obj.nVersion);
         READWRITE(obj.hashPrev);
@@ -366,6 +374,8 @@ public:
 
     uint256 GetBlockHash() const
     {
+        if(isUsingQuickIndex() && (hash != uint256()))
+           return hash;
         CBlockHeader block;
         block.nVersion        = nVersion;
         block.hashPrevBlock   = hashPrev;

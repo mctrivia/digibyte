@@ -19,6 +19,9 @@ struct IndexSummary {
     int best_block_height{0};
 };
 
+bool isUsingQuickIndex();
+void setQuickIndex(bool useQuickIndex);
+
 /**
  * Base class for indices of blockchain data. This implements
  * CValidationInterface and ensures blocks are indexed sequentially according
