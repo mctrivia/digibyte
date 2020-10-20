@@ -11,7 +11,6 @@
 #include <outputtype.h>
 #include <policy/feerate.h>
 #include <policy/fees.h>
-#include <policy/rbf.h>
 #include <rpc/rawtransaction_util.h>
 #include <rpc/server.h>
 #include <rpc/util.h>
@@ -157,17 +156,6 @@ static void WalletTxToJSON(interfaces::Chain& chain, interfaces::Chain::Lock& lo
     entry.pushKV("walletconflicts", conflicts);
     entry.pushKV("time", wtx.GetTxTime());
     entry.pushKV("timereceived", (int64_t)wtx.nTimeReceived);
-
-    // Add opt-in RBF status
-    std::string rbfStatus = "no";
-    if (confirms <= 0) {
-        RBFTransactionState rbfState = chain.isRBFOptIn(*wtx.tx);
-        if (rbfState == RBFTransactionState::UNKNOWN)
-            rbfStatus = "unknown";
-        else if (rbfState == RBFTransactionState::REPLACEABLE_BIP125)
-            rbfStatus = "yes";
-    }
-    entry.pushKV("bip125-replaceable", rbfStatus);
 
     for (const std::pair<const std::string, std::string>& item : wtx.mapValue)
         entry.pushKV(item.first, item.second);
