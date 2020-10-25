@@ -177,6 +177,10 @@ UniValue blockToJSON(const CBlock& block, const CBlockIndex* tip, const CBlockIn
     result.pushKV("height", blockindex->nHeight);
     result.pushKV("version", block.nVersion);
     result.pushKV("versionHex", strprintf("%08x", block.nVersion));
+    int algo = block.GetAlgo();
+    result.pushKV("pow_algo_id", algo);
+    result.pushKV("pow_algo", GetAlgoName(algo));
+    result.pushKV("pow_hash", GetPoWAlgoHash(block).GetHex());
     result.pushKV("merkleroot", block.hashMerkleRoot.GetHex());
     UniValue txs(UniValue::VARR);
     for(const auto& tx : block.vtx)
@@ -195,7 +199,7 @@ UniValue blockToJSON(const CBlock& block, const CBlockIndex* tip, const CBlockIn
     result.pushKV("mediantime", (int64_t)blockindex->GetMedianTimePast());
     result.pushKV("nonce", (uint64_t)block.nNonce);
     result.pushKV("bits", strprintf("%08x", block.nBits));
-    result.pushKV("difficulty", GetDifficulty(blockindex));
+    result.pushKV("difficulty", GetDifficulty(blockindex, miningAlgo));
     result.pushKV("chainwork", blockindex->nChainWork.GetHex());
     result.pushKV("nTx", (uint64_t)blockindex->nTx);
 
@@ -1264,7 +1268,47 @@ static void BIP9SoftForkDescPushBack(UniValue& softforks, const std::string &nam
     softforks.pushKV(name, rv);
 }
 
-RPCHelpMan getblockchaininfo()
+UniValue getalgostats(const JSONRPCRequest& request)
+{
+            RPCHelpMan{"getalgostats",
+                "\nReturns the distribution of algorithms given over the past <n> blocks.\n",
+                {
+                    {"nblocks", RPCArg::Type::NUM, RPCArg::Optional::NO, "Amount of past blocks."},
+                },
+                RPCResult{
+                    RPCResult::Type::STR_HEX, "algorithm-name", "The amount of blocks using this algorithm."},
+                RPCExamples{
+                    HelpExampleCli("getalgostats", "100")
+            + HelpExampleRpc("getalgostats", "100")
+                },
+            }.Check(request);
+
+    LOCK(cs_main);
+
+    CBlockIndex* pindex = ::ChainActive().Tip();
+    const int nHeight = pindex->nHeight;
+    const int historyBlocks = request.params[0].get_int();
+
+    if (historyBlocks <= 0 || historyBlocks >= nHeight || (nHeight - historyBlocks) <= 0)
+        return NullUniValue;
+
+    int algorithmRecord[NUM_ALGOS_IMPL] = { 0 };
+    for (int i = 0; i < historyBlocks; i++) {
+         ++algorithmRecord[pindex->GetAlgo()];
+         pindex = pindex->pprev;
+    }
+
+    UniValue obj(UniValue::VOBJ);
+    for (int i = 0; i < NUM_ALGOS_IMPL; i++) {
+         if (algorithmRecord[i] > 0) {
+             obj.pushKV(GetAlgoName(i), algorithmRecord[i]);
+         }
+    }
+
+    return obj;
+}
+
+UniValue getblockchaininfo(const JSONRPCRequest& request)
 {
     return RPCHelpMan{"getblockchaininfo",
                 "Returns an object containing various state info regarding blockchain processing.\n",
@@ -1352,6 +1396,11 @@ RPCHelpMan getblockchaininfo()
     }
 
     const Consensus::Params& consensusParams = Params().GetConsensus();
+    UniValue difficulties(UniValue::VOBJ);
+    for (int algo = 0; algo < NUM_ALGOS_IMPL; algo++) {
+        if (IsAlgoActive(tip, consensusParams, algo))
+            difficulties.pushKV(GetAlgoName(algo), (double)GetDifficulty(nullptr, algo));
+    }
     UniValue softforks(UniValue::VOBJ);
     BuriedForkDescPushBack(softforks, "bip34", consensusParams.BIP34Height);
     BuriedForkDescPushBack(softforks, "bip66", consensusParams.BIP66Height);
@@ -1360,8 +1409,8 @@ RPCHelpMan getblockchaininfo()
     BuriedForkDescPushBack(softforks, "segwit", consensusParams.SegwitHeight);
     BIP9SoftForkDescPushBack(softforks, "testdummy", consensusParams, Consensus::DEPLOYMENT_TESTDUMMY);
     BIP9SoftForkDescPushBack(softforks, "taproot", consensusParams, Consensus::DEPLOYMENT_TAPROOT);
-    obj.pushKV("softforks",             softforks);
-
+    obj.pushKV("softforks", softforks);
+    obj.pushKV("difficulties", difficulties);
     obj.pushKV("warnings", GetWarnings(false).original);
     return obj;
 },
@@ -2471,6 +2520,7 @@ void RegisterBlockchainRPCCommands(CRPCTable &t)
 static const CRPCCommand commands[] =
 { //  category              name                      actor (function)         argNames
   //  --------------------- ------------------------  -----------------------  ----------
+    { "blockchain",         "getalgostats",           &getalgostats,           {"nblocks"} },
     { "blockchain",         "getblockchaininfo",      &getblockchaininfo,      {} },
     { "blockchain",         "getchaintxstats",        &getchaintxstats,        {"nblocks", "blockhash"} },
     { "blockchain",         "getblockstats",          &getblockstats,          {"hash_or_height", "stats"} },
