@@ -1253,7 +1253,7 @@ CAmount GetDGBSubsidy(int nHeight, const Consensus::Params& consensusParams) {
 CAmount GetBlockSubsidy(int nHeight, const Consensus::Params& consensusParams)
 {
 	CAmount nSubsidy = COIN;
-     LogPrintf("block height for reward is %d\n", nHeight);
+        //LogPrintf("block height for reward is %d\n", nHeight);
 	if(nHeight < consensusParams.nDiffChangeTarget) {
 		//this is pre-patch, reward is 8000.
 		nSubsidy = 8000 * COIN;
@@ -3573,17 +3573,16 @@ static bool ContextualCheckBlockHeader(const CBlockHeader& block, BlockValidatio
     const int nHeight = pindexPrev->nHeight + 1;
 
     // Check proof of work
+    const int currentAlgo = block.GetAlgo();
     const Consensus::Params& consensusParams = params.GetConsensus();
-    if (!IsAlgoActive(pindexPrev, consensusParams, block.GetAlgo()))
+    if (!IsAlgoActive(pindexPrev, consensusParams, currentAlgo))
         return state.Invalid(BlockValidationResult::BLOCK_INVALID_HEADER, "algo-inactive", "PoW algorithm is not active");
-    if (block.nBits != GetNextWorkRequired(pindexPrev, &block, consensusParams, block.GetAlgo()))
+    if (block.nBits != GetNextWorkRequired(pindexPrev, &block, consensusParams, currentAlgo))
         return state.Invalid(BlockValidationResult::BLOCK_INVALID_HEADER, "bad-diffbits", "incorrect proof of work");
 
     // Check for non-standard SCRYPT version.
     if (VersionBitsState(pindexPrev, consensusParams, Consensus::DEPLOYMENT_RESERVEALGO, versionbitscache) == ThresholdState::ACTIVE &&
-        block.GetAlgo() == ALGO_SCRYPT &&
-        (block.nVersion & BLOCK_VERSION_ALGO) != BLOCK_VERSION_SCRYPT)
-    {
+        currentAlgo == ALGO_SCRYPT && (block.nVersion & BLOCK_VERSION_ALGO) != BLOCK_VERSION_SCRYPT) {
         return state.Invalid(BlockValidationResult::BLOCK_INVALID_HEADER, "invalid-algo", "invalid algo id");
     }
 

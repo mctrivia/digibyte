@@ -3,21 +3,16 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include <primitives/block.h>
 
 #include <arith_uint256.h>
-#include <crypto/common.h>
 #include <crypto/hashgroestl.h>
 #include <crypto/hashodo.h>
 #include <crypto/hashqubit.h>
 #include <crypto/hashskein.h>
-#include <crypto/scrypt.h>
 #include <consensus/consensus.h>
 #include <chainparams.h>
-#include <util/system.h>
 #include <util/strencodings.h>
 #include <hash.h>
-#include <tinyformat.h>
 
 uint256 CBlockHeader::GetHash() const
 {
