@@ -127,9 +127,17 @@ static UniValue generateBlocks(const CTxMemPool& mempool, const CScript& coinbas
             LOCK(cs_main);
             IncrementExtraNonce(pblock, ::ChainActive().Tip(), nExtraNonce);
         }
-        while (nMaxTries > 0 && pblock->nNonce < std::numeric_limits<uint32_t>::max() && !CheckProofOfWork(GetPoWAlgoHash(*pblock), pblock->nBits, Params().GetConsensus()) && !ShutdownRequested()) {
+        uint32_t hashState = 0;
+        uint256 bestHash = UINT256_MAX();
+        int64_t hashStart = GetTimeMillis();
+        while (nMaxTries > 0 && pblock->nNonce < std::numeric_limits<uint32_t>::max() && !CheckProofOfWork(pblock->GetPoWAlgoHash(Params().GetConsensus()), pblock->nBits, bestHash, Params().GetConsensus()) && !ShutdownRequested()) {
             ++pblock->nNonce;
             --nMaxTries;
+            if (GetTimeMillis() - hashStart > 1000) {
+               LogPrintf("hashing @ %dh/s (besthash: %s)\n", pblock->nNonce - hashState, bestHash.ToString().c_str());
+               hashState = pblock->nNonce;
+               hashStart = GetTimeMillis();
+            }
         }
         if (nMaxTries == 0 || ShutdownRequested()) {
             break;
@@ -548,11 +556,14 @@ static RPCHelpMan getblocktemplate()
     if(!node.connman)
         throw JSONRPCError(RPC_CLIENT_P2P_DISABLED, "Error: Peer-to-peer functionality missing or disabled");
 
-    if (node.connman->GetNodeCount(CConnman::CONNECTIONS_ALL) == 0)
-        throw JSONRPCError(RPC_CLIENT_NOT_CONNECTED, PACKAGE_NAME " is not connected!");
+    if (!IsTestnet()) {
 
-    if (::ChainstateActive().IsInitialBlockDownload())
-        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, PACKAGE_NAME " is in initial sync and waiting for blocks...");
+        if (node.connman->connman->GetNodeCount(CConnman::CONNECTIONS_ALL) == 0)
+            throw JSONRPCError(RPC_CLIENT_NOT_CONNECTED, PACKAGE_NAME " is not connected!");
+
+        if (::ChainstateActive().IsInitialBlockDownload())
+            throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, PACKAGE_NAME " is in initial sync and waiting for blocks...");
+    }
 
     static unsigned int nTransactionsUpdatedLast;
     const CTxMemPool& mempool = EnsureMemPool(request.context);
@@ -605,7 +616,7 @@ static RPCHelpMan getblocktemplate()
     }
 
     // GBT must be called with 'segwit' set in the rules
-    if (setClientRules.count("segwit") != 1) {
+    if (!IsTestnet() && setClientRules.count("segwit") != 1) {
         throw JSONRPCError(RPC_INVALID_PARAMETER, "getblocktemplate must be called with the segwit rule set (call with {\"rules\": [\"segwit\"]})");
     }
 
