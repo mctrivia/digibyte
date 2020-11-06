@@ -151,6 +151,7 @@ BITCOIN_CORE_H = \
   memusage.h \
   merkleblock.h \
   miner.h \
+  multialgo.h \
   net.h \
   net_permissions.h \
   net_processing.h \
@@ -285,6 +286,7 @@ libbitcoin_server_a_SOURCES = \
   init.cpp \
   dbwrapper.cpp \
   miner.cpp \
+  multialgo.cpp \
   net.cpp \
   net_processing.cpp \
   node/coin.cpp \
@@ -534,6 +536,7 @@ libbitcoin_util_a_SOURCES = \
   compat/strnlen.cpp \
   fs.cpp \
   interfaces/handler.cpp \
+  multialgo.cpp \
   logging.cpp \
   random.cpp \
   randomenv.cpp \
@@ -621,7 +624,7 @@ digibyte_cli_LDADD += $(BOOST_LIBS) $(EVENT_LIBS)
 #
 
 # bitcoin-tx binary #
-digibyte_tx_SOURCES = bitcoin-tx.cpp
+digibyte_tx_SOURCES = bitcoin-tx.cpp multialgo.cpp
 digibyte_tx_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
 digibyte_tx_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 digibyte_tx_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)

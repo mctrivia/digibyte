@@ -1888,7 +1888,7 @@ public:
 
     bool Condition(const CBlockIndex* pindex, const Consensus::Params& params) const override
     {
-        int nAlgo = pindex->GetAlgo();
+        int nAlgo = GetAlgoByIndex(pindex);
         return ((pindex->nVersion & VERSIONBITS_TOP_MASK) == VERSIONBITS_TOP_BITS) &&
                ((pindex->nVersion >> bit) & 1) != 0 &&
                ((ComputeBlockVersion(pindex->pprev, params, nAlgo) >> bit) & 1) == 0;
@@ -2499,7 +2499,7 @@ void static UpdateTip(const CBlockIndex* pindexNew, const CChainParams& chainPar
         // Check the version of the last 100 blocks to see if we need to upgrade:
         for (int i = 0; i < 100 && pindex != nullptr; i++)
         {
-            int nAlgo = pindex->GetAlgo();
+            int nAlgo = GetAlgoByIndex(pindex);
             int32_t nExpectedVersion = ComputeBlockVersion(pindex->pprev, chainParams.GetConsensus(), nAlgo);
             if (pindex->nVersion > VERSIONBITS_LAST_OLD_BLOCK_VERSION && (pindex->nVersion & ~nExpectedVersion) != 0)
             {
@@ -2517,7 +2517,7 @@ void static UpdateTip(const CBlockIndex* pindexNew, const CChainParams& chainPar
     }
     LogPrintf("%s: new best=%s height=%d version=0x%08x algo=%d (%s) log2_work=%.8g tx=%lu date='%s' progress=%f cache=%.1fMiB(%utxo)%s\n", __func__,
       pindexNew->GetBlockHash().ToString(), pindexNew->nHeight, pindexNew->nVersion,
-      pindexNew->GetAlgo(), GetAlgoName(pindexNew->GetAlgo()),
+      GetAlgoByIndex(pindexNew), GetAlgoNameByIndex(pindexNew),
       log(pindexNew->nChainWork.getdouble())/log(2.0), (unsigned long)pindexNew->nChainTx,
       FormatISO8601DateTime(pindexNew->GetBlockTime()),
       GuessVerificationProgress(chainParams.TxData(), pindexNew), ::ChainstateActive().CoinsTip().DynamicMemoryUsage() * (1.0 / (1<<20)), ::ChainstateActive().CoinsTip().GetCacheSize(),
@@ -3527,7 +3527,7 @@ static bool ContextualCheckBlockHeader(const CBlockHeader& block, BlockValidatio
     const int nHeight = pindexPrev->nHeight + 1;
 
     // Check proof of work
-    const int currentAlgo = block.GetAlgo();
+    const int currentAlgo = GetAlgo(block.nVersion);
     const Consensus::Params& consensusParams = params.GetConsensus();
     if (!IsAlgoActive(pindexPrev, consensusParams, currentAlgo))
         return state.Invalid(BlockValidationResult::BLOCK_INVALID_HEADER, "algo-inactive", "PoW algorithm is not active");

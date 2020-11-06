@@ -6,6 +6,7 @@
 #include <arith_uint256.h>
 #include <chain.h>
 #include <chainparams.h>
+#include <multialgo.h>
 #include <validation.h>
 
 /**
@@ -122,28 +123,6 @@ void CBlockIndex::BuildSkip()
         pskip = pprev->GetAncestor(GetSkipHeight(nHeight));
 }
 
-int GetAlgoWorkFactor(int nHeight, int algo)
-{
-    if (nHeight < Params().GetConsensus().multiAlgoDiffChangeTarget)
-        return 1;
-
-    switch (algo)
-    {
-        case ALGO_SHA256D:
-            return 1;
-        case ALGO_SCRYPT:
-            return 1024 * 4;
-        case ALGO_GROESTL:
-            return 64 * 8;
-        case ALGO_SKEIN:
-            return 4 * 6;
-        case ALGO_QUBIT:
-            return 128 * 8;
-        default:
-            return 1;
-    }
-}
-
 arith_uint256 GetBlockProofBase(const CBlockIndex& block)
 {
     arith_uint256 bnTarget;
@@ -169,7 +148,7 @@ arith_uint256 GetBlockProof(const CBlockIndex& block)
     if (nHeight < params.workComputationChangeTarget)
     {
         arith_uint256 bnBlockWork = GetBlockProofBase(block);
-        uint32_t nAlgoWork = GetAlgoWorkFactor(nHeight, header.GetAlgo());
+        uint32_t nAlgoWork = GetAlgoWorkFactor(nHeight, GetAlgo(header.nVersion));
         return bnBlockWork * nAlgoWork;
     }
     else
