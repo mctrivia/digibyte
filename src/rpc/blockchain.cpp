@@ -14,6 +14,7 @@
 #include <core_io.h>
 #include <hash.h>
 #include <index/blockfilterindex.h>
+#include <multialgo.h>
 #include <node/coinstats.h>
 #include <node/context.h>
 #include <node/utxo_snapshot.h>
@@ -177,7 +178,7 @@ UniValue blockToJSON(const CBlock& block, const CBlockIndex* tip, const CBlockIn
     result.pushKV("height", blockindex->nHeight);
     result.pushKV("version", block.nVersion);
     result.pushKV("versionHex", strprintf("%08x", block.nVersion));
-    int algo = block.GetAlgo();
+    int algo = GetAlgo(block.nVersion);
     result.pushKV("pow_algo_id", algo);
     result.pushKV("pow_algo", GetAlgoName(algo));
     result.pushKV("pow_hash", GetPoWAlgoHash(block).GetHex());
@@ -1294,7 +1295,7 @@ UniValue getalgostats(const JSONRPCRequest& request)
 
     int algorithmRecord[NUM_ALGOS_IMPL] = { 0 };
     for (int i = 0; i < historyBlocks; i++) {
-         ++algorithmRecord[pindex->GetAlgo()];
+         ++algorithmRecord[GetAlgoByIndex(pindex)];
          pindex = pindex->pprev;
     }
 

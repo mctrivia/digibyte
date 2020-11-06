@@ -309,7 +309,7 @@ bool CheckProofOfWork(uint256 hash, unsigned int nBits, const Consensus::Params&
 const CBlockIndex* GetLastBlockIndexForAlgo(const CBlockIndex* pindex, const Consensus::Params& params, int algo)
 {
     for (; pindex; pindex = pindex->pprev) {
-        if (pindex->GetAlgo() != algo)
+        if (GetAlgoByIndex(pindex) != algo)
             continue;
         // ignore special min-difficulty testnet blocks
         if (params.fPowAllowMinDifficultyBlocks && pindex->pprev && pindex->nTime > pindex->pprev->nTime + params.nTargetSpacing * 2) {

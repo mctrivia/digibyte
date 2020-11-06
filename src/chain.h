@@ -9,6 +9,7 @@
 #include <arith_uint256.h>
 #include <index/base.h>
 #include <consensus/params.h>
+#include <multialgo.h>
 #include <flatfile.h>
 #include <primitives/block.h>
 #include <pow.h>
@@ -241,12 +242,6 @@ public:
     {
         CBlockHeader block = GetBlockHeader();
         return GetPoWAlgoHash(block);
-    }
-
-    int GetAlgo() const
-    {
-        CBlockHeader block = GetBlockHeader();
-        return block.GetAlgo();
     }
 
     /**
