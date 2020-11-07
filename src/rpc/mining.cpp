@@ -10,6 +10,7 @@
 #include <consensus/params.h>
 #include <consensus/validation.h>
 #include <core_io.h>
+#include <crypto/seedmgr.h>
 #include <key_io.h>
 #include <miner.h>
 #include <net.h>
@@ -130,7 +131,7 @@ static UniValue generateBlocks(const CTxMemPool& mempool, const CScript& coinbas
         uint32_t hashState = 0;
         uint256 bestHash = UINT256_MAX();
         int64_t hashStart = GetTimeMillis();
-        while (nMaxTries > 0 && pblock->nNonce < std::numeric_limits<uint32_t>::max() && !CheckProofOfWork(pblock->GetPoWAlgoHash(Params().GetConsensus()), pblock->nBits, bestHash, Params().GetConsensus()) && !ShutdownRequested()) {
+        while (nMaxTries > 0 && pblock->nNonce < std::numeric_limits<uint32_t>::max() && !CheckProofOfWork(pblock->GetPoWAlgoHash(nHeight), pblock->nBits, bestHash, Params().GetConsensus()) && !ShutdownRequested()) {
             ++pblock->nNonce;
             --nMaxTries;
             if (GetTimeMillis() - hashStart > 1000) {
@@ -481,6 +482,12 @@ static RPCHelpMan getblocktemplate()
 {
     LOCK(cs_main);
 
+    //! for randomx seed update
+    int height = ::ChainActive().Height();
+    seedmanager.updateheight(height);
+    int epoch = seedmanager.currentepoch(height);
+    uint256 seed = seedmanager.getseedhash(epoch);
+
     std::string strMode = "template";
     UniValue lpval = NullUniValue;
     std::set<std::string> setClientRules;
@@ -794,6 +801,8 @@ static RPCHelpMan getblocktemplate()
     result.pushKV("height", (int64_t)(pindexPrev->nHeight+1));
     if (algo == ALGO_ODO)
         result.pushKV("odokey", (int64_t)OdoKey(consensusParams, pblock->GetBlockTime()));
+    if (algo == ALGO_RANDOMX)
+	result.pushKV("seed", seed.ToString());
 
     if (!pblocktemplate->vchCoinbaseCommitment.empty()) {
         result.pushKV("default_witness_commitment", HexStr(pblocktemplate->vchCoinbaseCommitment));
