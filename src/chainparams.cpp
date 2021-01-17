@@ -160,11 +160,6 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_NVERSIONBIPS].nStartTime = 1489997089; // March 24th, 2017 1490355345
         consensus.vDeployments[Consensus::DEPLOYMENT_NVERSIONBIPS].nTimeout = 1521891345;    // March 24th, 2018
 
-        // Reservation of version bits for future algos
-        consensus.vDeployments[Consensus::DEPLOYMENT_RESERVEALGO].bit = 12;
-        consensus.vDeployments[Consensus::DEPLOYMENT_RESERVEALGO].nStartTime = 1542672000; // 20 Nov, 2018
-        consensus.vDeployments[Consensus::DEPLOYMENT_RESERVEALGO].nTimeout = 1574208000;   // 20 Nov, 2019
-
         // Deployment of Odo proof-of-work hardfork
         consensus.vDeployments[Consensus::DEPLOYMENT_ODO].bit = 6;
         consensus.vDeployments[Consensus::DEPLOYMENT_ODO].nStartTime = 1556668800; // 1 May, 2019

@@ -16,7 +16,6 @@ enum DeploymentPos {
     DEPLOYMENT_TESTDUMMY,
     DEPLOYMENT_TAPROOT, // Deployment of Schnorr/Taproot (BIPs 340-342)
     DEPLOYMENT_NVERSIONBIPS, // Deployment of BIP34, BIP65, and BIP66.
-    DEPLOYMENT_RESERVEALGO, // Reservation of version bits for future algos
     DEPLOYMENT_ODO, // Odo hard fork
     DEPLOYMENT_RANDOMX, // RandomX hard fork
     MAX_VERSION_BITS_DEPLOYMENTS
