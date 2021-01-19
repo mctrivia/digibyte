@@ -1,6 +1,6 @@
 <TS language="ko" version="2.1">
 <context>
-    <name>AddressBookPage</name>s
+    <name>AddressBookPage</name>
     <message>
         <source>Right-click to edit address or label</source>
         <translation>지갑 주소나 라벨을 수정하려면 우클릭을 하십시오.</translation>

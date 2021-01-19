@@ -86,7 +86,7 @@ if BUILD_BITCOIND
 endif
 
 if BUILD_BITCOIN_NODE
-  bin_PROGRAMS += bitcoin-node
+  bin_PROGRAMS += digibyte-node
 endif
 
 if BUILD_BITCOIN_CLI
@@ -642,16 +642,16 @@ nodist_libbitcoin_util_a_SOURCES = $(srcdir)/obj/build.h
 #
 
 # bitcoind & bitcoin-node binaries #
-digibyted_daemon_sources = bitcoind.cpp
-digibyted_bin_cppflags = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
-digibyted_bin_cxxflags = $(AM_CXXFLAGS) $(PIE_FLAGS)
-digibyted_bin_ldflags = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS) $(PTHREAD_FLAGS)
+digibyte_daemon_sources = bitcoind.cpp
+digibyte_bin_cppflags = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
+digibyte_bin_cxxflags = $(AM_CXXFLAGS) $(PIE_FLAGS)
+digibyte_bin_ldflags = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS) $(PTHREAD_FLAGS)
 
 if TARGET_WINDOWS
-digibyted_daemon_sources += bitcoind-res.rc
+digibyte_daemon_sources += bitcoind-res.rc
 endif
 
-digibyted_LDADD = \
+digibyte_bin_ldadd = \
   $(LIBBITCOIN_SERVER) \
   $(LIBBITCOIN_WALLET) \
   $(LIBBITCOIN_COMMON) \
@@ -730,7 +730,7 @@ if TARGET_WINDOWS
 digibyte_wallet_SOURCES += bitcoin-wallet-res.rc
 endif
 
-digibyte_wallet_LDADD = \
+digibyte_wallet_LDADD += \
   $(LIBBITCOIN_WALLET_TOOL) \
   $(LIBBITCOIN_WALLET) \
   $(LIBBITCOIN_COMMON) \

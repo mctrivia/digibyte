@@ -324,9 +324,9 @@ bool SendCoinsDialog::PrepareSendText(QString& question_string, QString& informa
         question_string.append(" (" + QString::number((double)m_current_transaction->getTransactionSize() / 1000) + " kB): ");
 
         // append transaction fee value
-        questionString.append("<span style='color:#aa0000; font-weight:bold;'>");
-        questionString.append(BitcoinUnits::formatHtmlWithUnit(model->getOptionsModel()->getDisplayUnit(), txFee));
-        questionString.append("</span><br />");
+        question_string.append("<span style='color:#aa0000; font-weight:bold;'>");
+        question_string.append(BitcoinUnits::formatHtmlWithUnit(model->getOptionsModel()->getDisplayUnit(), txFee));
+        question_string.append("</span><br />");
     }
 
     // add total amount in all subdivision units

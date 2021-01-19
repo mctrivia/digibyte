@@ -137,7 +137,7 @@ public:
      */
     uint64_t GetCheapHash() const
     {
-        return ReadLE64(data);
+        return ReadLE64(m_data);
     }
 };
 
@@ -154,7 +154,7 @@ public:
     {
         uint256 ret;
         for (unsigned int i = 0; i < uint256::WIDTH; i++){
-            ret.data[i] = data[i];
+            ret.m_data[i] = m_data[i];
         }
         return ret;
     }    

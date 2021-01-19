@@ -2565,8 +2565,9 @@ static void UpdateTip(CTxMemPool& mempool, const CBlockIndex* pindexNew, const C
             }
             pindex = pindex->pprev;
         }
-        if (nUpgraded > 0 && !fAllAsicBoost)
-            AppendWarning(warningMessages, strprintf(_("%d of last 100 blocks have unexpected version").translated, nUpgraded));
+        if (num_unexpected_version > 0 && !fAllAsicBoost) {
+            LogPrint(BCLog::VALIDATION, "%d of last 100 blocks have unexpected version\n", num_unexpected_version);
+        }
     }
     LogPrintf("%s: new best=%s height=%d version=0x%08x algo=%d (%s) log2_work=%.8g tx=%lu date='%s' progress=%f cache=%.1fMiB(%utxo)%s\n", __func__,
       pindexNew->GetBlockHash().ToString(), pindexNew->nHeight, pindexNew->nVersion,
@@ -5312,8 +5313,6 @@ Optional<uint256> ChainstateManager::SnapshotBlockhash() const {
     return {};
 }
 
-std::vector<CChainState*> ChainstateManager::GetAll()
-
 //! Returns true if client is operating in testnet
 bool IsTestnet()
 {
@@ -5337,7 +5336,7 @@ void init_populaterandomx()
     pindex->GetBlockHeader().GetPoWAlgoHash(0);
 }
 
-class CMainCleanup
+std::vector<CChainState*> ChainstateManager::GetAll()
 {
     std::vector<CChainState*> out;
 

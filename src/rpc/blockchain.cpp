@@ -1309,7 +1309,7 @@ UniValue getalgostats(const JSONRPCRequest& request)
     return obj;
 }
 
-UniValue getblockchaininfo(const JSONRPCRequest& request)
+RPCHelpMan getblockchaininfo()
 {
     return RPCHelpMan{"getblockchaininfo",
                 "Returns an object containing various state info regarding blockchain processing.\n",
