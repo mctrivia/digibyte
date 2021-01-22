@@ -123,6 +123,7 @@ private:
     QLabel* labelWalletEncryptionIcon = nullptr;
     QLabel* labelWalletHDStatusIcon = nullptr;
     GUIUtil::ClickableLabel* labelProxyIcon = nullptr;
+    GUIUtil::ClickableLabel* dandelionActivityIcon = nullptr;
     GUIUtil::ClickableLabel* connectionsControl = nullptr;
     GUIUtil::ClickableLabel* labelBlocksIcon = nullptr;
     QLabel* progressBarLabel = nullptr;
@@ -200,6 +201,9 @@ private:
 
     /** Connect core signals to GUI client */
     void subscribeToCoreSignals();
+
+    /** Update UI with indicator of dandelion activity. */
+    void updateDandelionState();
 
     /** Update UI with latest network info from model. */
     void updateNetworkState();

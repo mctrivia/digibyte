@@ -34,7 +34,9 @@
 #include <chainparams.h>
 #include <interfaces/handler.h>
 #include <interfaces/node.h>
+#include <node/context.h>
 #include <node/ui_interface.h>
+#include <rpc/blockchain.h>     //! access to g_node
 #include <util/system.h>
 #include <util/translation.h>
 #include <validation.h>
@@ -150,6 +152,7 @@ BitcoinGUI::BitcoinGUI(interfaces::Node& node, const PlatformStyle *_platformSty
     labelWalletEncryptionIcon = new QLabel();
     labelWalletHDStatusIcon = new QLabel();
     labelProxyIcon = new GUIUtil::ClickableLabel();
+    dandelionActivityIcon = new GUIUtil::ClickableLabel();
     connectionsControl = new GUIUtil::ClickableLabel();
     labelBlocksIcon = new GUIUtil::ClickableLabel();
     if(enableWallet)
@@ -161,6 +164,8 @@ BitcoinGUI::BitcoinGUI(interfaces::Node& node, const PlatformStyle *_platformSty
         frameBlocksLayout->addWidget(labelWalletHDStatusIcon);
     }
     frameBlocksLayout->addWidget(labelProxyIcon);
+    frameBlocksLayout->addStretch();
+    frameBlocksLayout->addWidget(dandelionActivityIcon);
     frameBlocksLayout->addStretch();
     frameBlocksLayout->addWidget(connectionsControl);
     frameBlocksLayout->addStretch();
@@ -585,6 +590,7 @@ void BitcoinGUI::setClientModel(ClientModel *_clientModel, interfaces::BlockAndH
 
         // Keep up to date with client
         updateNetworkState();
+        updateDandelionState();
         connect(_clientModel, &ClientModel::numConnectionsChanged, this, &BitcoinGUI::setNumConnections);
         connect(_clientModel, &ClientModel::networkActiveChanged, this, &BitcoinGUI::setNetworkActive);
 
@@ -897,6 +903,34 @@ void BitcoinGUI::gotoLoadPSBT(bool from_clipboard)
 }
 #endif // ENABLE_WALLET
 
+void BitcoinGUI::updateDandelionState()
+{
+    int64_t sinceLast = g_node->connman->timeSinceDandelionActivity();
+
+    //! adjust icon depending on last dandelion relay
+    QString icon = ":/icons/dandelion_0";
+    if (sinceLast >= 0 && sinceLast < 5)
+        icon = ":/icons/dandelion_3";
+    if (sinceLast >= 5 && sinceLast < 10)
+        icon = ":/icons/dandelion_2";
+    if (sinceLast >= 10 && sinceLast < 15)
+        icon = ":/icons/dandelion_1";
+    if (sinceLast >= 15)
+        icon = ":/icons/dandelion_0";
+
+    QString tooltip;
+    if (gArgs.GetBoolArg("-dandelion", DEFAULT_DANDELION_PROTOCOL)) {
+        tooltip = tr("Dandelion privacy protocol is active.") + QString(".<br>");
+    } else {
+        tooltip = tr("Dandelion privacy protocol is not active.") + QString(".<br>");
+    }
+
+    // Don't word-wrap this (fixed-width) tooltip
+    tooltip = QString("<nobr>") + tooltip + QString("</nobr>");
+    dandelionActivityIcon->setToolTip(tooltip);
+    dandelionActivityIcon->setPixmap(platformStyle->SingleColorIcon(icon).pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
+}
+
 void BitcoinGUI::updateNetworkState()
 {
     int count = clientModel->getNumConnections();
@@ -929,15 +963,18 @@ void BitcoinGUI::updateNetworkState()
 void BitcoinGUI::setNumConnections(int count)
 {
     updateNetworkState();
+    updateDandelionState();
 }
 
 void BitcoinGUI::setNetworkActive(bool networkActive)
 {
     updateNetworkState();
+    updateDandelionState();
 }
 
 void BitcoinGUI::updateHeadersSyncProgressLabel()
 {
+    updateDandelionState();
     int64_t headersTipTime = clientModel->getHeaderTipTime();
     int headersTipHeight = clientModel->getHeaderTipHeight();
     int estHeadersLeft = (GetTime() - headersTipTime) / Params().GetConsensus().nPowTargetSpacing;
